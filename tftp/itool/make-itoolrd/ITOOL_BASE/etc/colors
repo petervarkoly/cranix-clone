@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Reset fb color mode
+RESET="]R"
+# ANSI COLORS
+# Erase to end of line
+CRE="[K"
+# Clear and reset Screen
+CLEAR="c"
+# Normal color
+NORMAL="[0;39m"
+# RED: Failure or error message
+RED="[1;31m"
+# GREEN: Success message
+GREEN="[1;32m"
+# YELLOW: Descriptions
+YELLOW="[1;33m"
+# BLUE: System mesages
+BLUE="[1;34m"
+# MAGENTA: Found devices or drivers
+MAGENTA="[1;35m"
+# CYAN: Questions
+CYAN="[1;36m"
+# BOLD WHITE: Hint
+WHITE="[1;37m"
+
+# Clear screen with colormode reset
+#echo "$CLEAR$RESET"
+#echo "$CLEAR"
+# Just go to the top of the screen
+#echo -n "[H[J"
+
+inform ( ) {
+	# Gibt anhand des letzten Befehls DONE oder FAILED aus
+    test "$?" = 0 && { echo -e "\015\t\t\t\t\t\t\t\t ${NORMAL} [  ${GREEN}DONE${NORMAL}  ]"; } || { echo -e "\015\t\t\t\t\t\t\t\t ${NORMAL} [ ${RED}FAILED${NORMAL} ]"; }
+}

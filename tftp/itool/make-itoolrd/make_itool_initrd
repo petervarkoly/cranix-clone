@@ -1,0 +1,48 @@
+#!/bin/bash
+DELIT=$( cat to-delete )
+if [ "$1" = "new" ]
+then
+    rm -r /var/cache/zypp/packages/*
+    test -e binaries && rm -rf binaries
+    for i in `cat packages`
+    do
+	echo "############ start $i ##########"
+	zypper -n install -f -d $i
+	echo "--------------------------------"
+    done
+    mkdir binaries
+    find /var/cache/zypp/packages/ -type f -exec mv {} binaries \;
+    if [ -d binaries-plus ]; then
+	cp binaries-plus/* binaries/
+    fi
+fi
+
+# Remove not needed rpms
+
+test -e ITOOL_INITRD && rm -r ITOOL_INITRD
+mkdir ITOOL_INITRD
+cd ITOOL_INITRD
+for i in ../binaries/*rpm
+do
+   rpm2cpio $i | cpio --extract --make-directories
+done
+
+rm -r usr/share/{doc,man,info}
+
+#Remove not needed files and directories
+for i in $DELIT
+do
+   rm -rf ./$i || echo "rm -rf ./$i" 
+done
+
+test -e sbin/mount.ntfs-3g && mv sbin/mount.ntfs-3g sbin/mount.ntfs
+
+cd ..
+
+test -d ITOOL_BASE && rsync -a -C ITOOL_BASE/ ITOOL_INITRD/
+chown -R root:root ITOOL_INITRD/
+chmod 700 ITOOL_INITRD/root/.ssh/
+chmod 600 ITOOL_INITRD/root/.ssh/*
+cd ITOOL_INITRD/
+find . ! -name "*~" | cpio -H newc --create | gzip -9 >  ../../itoolrd
+cd ..

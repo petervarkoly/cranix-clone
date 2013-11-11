@@ -1,0 +1,9 @@
+timeout         1
+prompt          0
+default 	0
+ui              gfxboot bootlogo
+
+LABEL	cloneTool
+        kernel boot/linux
+        append initrd=boot/initrd vga=normal ramdisk_size=512000 ramdisk_blocksize=4096 ITOOL=partimage STARTCMD=clone PARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1
+        IPAPPEND 2

@@ -1,0 +1,35 @@
+#! /bin/bash
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:/root/bin:/usr/X11R6/bin:/usr/local/bin:/lbin
+
+exec < /dev/console > /dev/console 2>&1 3>&1
+
+#echo verbose >/proc/splash
+
+echo root reboot >/etc/yast.inf
+
+set > /tmp/SETTING
+
+# searching for LDAPBASE
+export LDAPBASE=`ldapsearch -x -b "" -s base -h ldap -LLL namingcontexts | grep namingContexts: | sed 's/namingContexts: //'`
+
+sed -i "s/LDAPBASE/$LDAPBASE/" /etc/openldap/ldap.conf
+
+## Evaluate the boot parameter
+for i in `cat /proc/cmdline `
+do
+    echo $i | grep -q '=' && eval "export $i";
+done
+
+if [ -z "$NOSSH" ]
+then
+	/usr/bin/ssh-keygen -t rsa1 -b 1024 -f /etc/ssh/ssh_host_key -N ''
+	/usr/bin/ssh-keygen -t dsa  -b 1024 -f /etc/ssh/ssh_host_dsa_key -N ''
+	/usr/bin/ssh-keygen -t rsa  -b 1024 -f /etc/ssh/ssh_host_rsa_key -N ''
+	/usr/sbin/sshd -q
+fi
+tftp admin -c get cloneToolLogin
+if [ -e cloneToollogin ]; then
+	mv cloneToolLogin /root/login
+fi
+/bin/bash -l /root/login

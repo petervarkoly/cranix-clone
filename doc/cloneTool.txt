@@ -1,0 +1,97 @@
+Open School Server Clone Tool - die neue Image Lösung im OSS
+
+1. Basiert wie iTool auch auf Partimage.
+1.1. iTool kann weiterhin benutzt werden, wird jedoch nur noch gefplegt 
+     nicht aber weiterentwickelt.
+
+2. Unterschiede zum iTool:
+2.1. OSSCloneTool kann mehrere Partitionen (ggf. mehrere Festplatten) 
+      klonen.
+2.2. Es gibt keine Hardware und Software Konfiugrationen mehr, sondern nur
+       noch Rechnerkonfigurationen.
+2.3. Es gibt keine lokale Speicherung der Partitionimages mehr. D.h. Es gibt
+       keine System und Cache Partititon sondern nur noch Systempartitionen.
+2.4. Die Systempartitionen müssen nicht mehr definiert werden sondern der 
+       Master Rechner muss so vorbereitet werden wie man die Partitionen
+       auf den anderen Rechner haben möchte.
+2.5. Sie können auch NTFS Partitonen klonen. 
+2.6. Sie können Datenpartitionen anlegen. Diese werden nicht geklont,
+       sondern immer neu formatiert. 
+
+3. Wie macht man das?
+ 
+3.1 Bevor Sie mit dem Klonen anfangen, müssen die zu berarbeitenden Rechner 
+      registriert und einer Rechnerkonfiguration zugeordnet sein. Es 
+      muss ein Master je Rechnerkonfiguration definiert werden.
+3.1 Dann wird der Masterrechner vorbereitet: Rechner 
+      vollständig partitionieren und sysprep ausführen. 
+      sysprep -mini -reseal -pnp -reboot (-activated)
+      Achten Sie darauf, dass die mit sysprep bearbeiteten Partitionen nicht neugestartet 
+       werden.
+3.1 Master - Rechner über PXE booten. cloneTool wählen und als "admin" anmelden.
+      Wichtig! Erscheint jetzt der Menüpunkt "Rechner Klonen" nicht, dann befinden
+      Sie sich nicht an einem Master-Rechner
+3.2.1. Starten Sie nun "Rechner klonen".  
+3.2.2. Als erstes müssen Sie die zu klonenden Partitionen auswählen
+3.2.3. Geben Sie den zu klonenden Partitionen eine Beschreibung.
+3.2.4 Anschließend müssen zu den Partitionen verschiedene Angaben gemacht 
+       werden:
+3.2.4.1 Betriebsystem: Win2K, WinXP, WinVista, Linux, Daten
+3.2.4.2 Bei  Linux braucht man nichts mehr.
+        Bei Win* muss die Windows Verbindung angegeben werden:
+            "Domain" "Workgroup" oder "Keine"
+        Bei Daten geben Sie das Format der Datenpartition an:
+	    fat32 ntfs ext2 ...
+3.5.4.3 Bei Win* muss ProductID angegeben werden.
+3.5.5 Jetzt werden:
+            MBR , Partitionierung und die nicht Daten-Partitionen gespeichert.
+3.5.6 Das war's bzw. Nicht vergessen, auch auf den  Master muss 
+     "Computer wiederherstellen" (siehe unten) ausgeführt werden.
+     Das sollten Sie aber erst dann machen, wenn Sie mind. einen weiteren
+     Client erfolgreich wiederhergestellt haben.
+
+4. Rechner manuell wiederherstellen
+4.1 Rechner registrieren und zu Rechnerkonfiguration zuweisen.
+4.2 Über PXE booten. cloneTool auswählen "Computer wiederherstellen"
+     ... warten ... kaffetrinken
+
+5. Hintergrund:
+5.1. Images liegen auf dem Server unter
+    /srv/itool/images/hwconf{1,2,3....4}/sd{a,b,d}{1,2,3...}.img
+5.2 Die mit "Manuelles Backup/Restore einer Partition" erstellten
+    Images liegen unter:
+        /srv/itool/images/manual/<Bezeichnung>.img
+5.3 Für die windows sysprep Dateien liegen templates in /srv/itool/config/ vor:
+      Win2KDomain.inf.templ
+      Win2KWorkgroup.inf.templ
+      WinXPDomain.inf.templ
+      WinXPWorkgroup.inf.templ
+    Diese kann man je nach Bedarf anpassen. Folgendes muss allerdings
+    (wenn vorhanden) unberührt bleiben:
+
+    ComputerName=HOSTNAME
+    ProductID=PRODUCTID
+
+    JoinDomain=WORKGROUP
+    DomainAdmin=register
+    DomainAdminPassword=register
+
+5.4 Für "Linux/Windows Extremisten":
+5.4.1  Für jedes Image kann man in /srv/itool/images/$HW/$PARTITION-Unattended/
+    Skripte hinterlegen, die per Windows-Unattended-Installation
+    ausgeführt werden. Dafür muss man ggf die sysprep.info Templates anpassen.
+5.4.2  Für jede Partition wird das Script (wenn vorhanden)
+     /srv/itool/images/$HW/$PARTITION-postscript.sh ausgeführt. 
+    Während des Ausführens ist die Partition unter  /mnt/$PARTITION gemountet.
+5.4.3 In die Datei /srv/tftp/pxelinux.cfg/default kann man für die Section
+    cloneTool den Bootparameter: SLEEP=<Wartezeit in Sekunden> setzten.
+    Dann wartet cloneTool nach jeder Operation so lange damit man evtl.
+    Fehlermeldungen abfotograieren kann:-)
+5.4.4  Kommentiert man die Zeile "NoShell: 1" in der Datei /srv/tftp/linuxrc.config
+    mit "#" aus, so kommt man in cloneTool mit <ALT>+<F2> auf eine Konsole mit
+    Rootrechten :-)
+5.4.5 Alles was unter /srv/itool/ROOT liegt wird nach dem Anmelden ans OSSCloneTool
+    ins System kopiert.  /srv/itool/ROOT/root/clone.sh.in ist unser OSSCloneTool
+    Skript. Kopiert man dieses nach  /srv/itool/ROOT/root/clone.sh
+    kann man dieses bearbeiten und dann wird diese Version ausgeführt.
+
