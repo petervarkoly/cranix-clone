@@ -1,35 +1,21 @@
+VERSION         = $(shell test -e ../VERSION && cp ../VERSION VERSION ; cat VERSION)
+RELEASE         = $(shell cat RELEASE)
+NRELEASE        = $(shell echo $(RELEASE) + 1 | bc )
+HERE            = $(shell pwd)
+PACKAGE         = oss-clone
+DESTDIR         = /
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
-XMLFILES        = $(shell cd xml; ls *.templ)
 INSTUSER	= 
 
 install:
-	#configure ftp service
-	mkdir -p $(DESTDIR)/etc/xinetd.d
-	mkdir -p $(DESTDIR)/srv/www/htdocs
-	mkdir -p $(DESTDIR)/srv/ftp/akt/CD{1,2,3,4,5,6}
-	mkdir -p $(DESTDIR)/srv/ftp/xml
+	#configure tftp boot template service
 	mkdir -p $(DESTDIR)/usr/share/oss/templates
-	install -m 444 $(INSTUSER)  config/vsftpd.conf.in        $(DESTDIR)/etc/vsftpd.conf.in
-	install -m 444 $(INSTUSER)  config/xinetd.d.vsftpd.in    $(DESTDIR)/etc/xinetd.d/vsftpd.in
 	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/oss/templates/pxeboot.in
 
 	#configure tftp service
-	mkdir -p $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
-	install -m 444 $(INSTUSER)  config/xinetd.d.tftp.in       $(DESTDIR)/etc/xinetd.d/tftp.in
-	install -m 444 $(INSTUSER)  tftp/german.kbd               $(DESTDIR)/srv/tftp/
+	mkdir -p $(DESTDIR)/srv/tftp/{clone,boot}
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
-	install -m 444 $(INSTUSER)  tftp/bootlogo                 $(DESTDIR)/srv/tftp/bootlogo
-	install -m 444 $(INSTUSER)  tftp/chain.c32                $(DESTDIR)/srv/tftp/chain.c32
-	install -m 444 $(INSTUSER)  tftp/clouds.jpg               $(DESTDIR)/srv/tftp/clouds.jpg
-	install -m 444 $(INSTUSER)  tftp/font.fnt                 $(DESTDIR)/srv/tftp/font.fnt
-	install -m 444 $(INSTUSER)  tftp/german.kbd               $(DESTDIR)/srv/tftp/german.kbd
-	install -m 444 $(INSTUSER)  tftp/gfxboot.c32              $(DESTDIR)/srv/tftp/gfxboot.c32
-	install -m 444 $(INSTUSER)  tftp/menu.c32                 $(DESTDIR)/srv/tftp/menu.c32
-	install -m 444 $(INSTUSER)  tftp/pxelinux.0               $(DESTDIR)/srv/tftp/pxelinux.0  
-	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/autoyast.in $(DESTDIR)/srv/tftp/pxelinux.cfg/autoyast.in
-	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/autoyast64.in $(DESTDIR)/srv/tftp/pxelinux.cfg/autoyast64.in
-	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
 	install -m 444 $(INSTUSER)  tftp/boot/*			  $(DESTDIR)/srv/tftp/boot/
 	install -m 444 $(INSTUSER)  tftp/clone/*		  $(DESTDIR)/srv/tftp/clone/
 	#configure itool service
@@ -42,12 +28,25 @@ install:
 	install -m 444 config/*bat             $(DESTDIR)/srv/itool/config
 	install -m 400 config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 
-	#configure autoyast2 enviroment
-	(cd xml; \
-	   install -m 644 $(INSTUSER) $(XMLFILES) $(DESTDIR)/srv/ftp/xml/ \
-	)
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 755 $(INSTUSER) bin/*           $(DESTDIR)/usr/sbin/
 
+
+dist:  
+	sudo rm -rf tftp/itool/make-itoolrd/ITOOL_INITRD/
+	./mkspec $(VERSION) $(NRELEASE) > $(PACKAGE).spec
+	find $(PACKAGE) \( -not -regex "^.*\.rpm" -a -not -regex "^.*\/\.svn.*" \) -xtype f > files; 
+	tar jcvpf $(PACKAGE).tar.bz2 -T files 
+	rm files
+	if [ -d /data1/OSC/home\:openschoolserver/$(PACKAGE) ] ; then \
+	        cd /data1/OSC/home\:openschoolserver/$(PACKAGE); osc up; cd $(HERE);\
+	        cp $(PACKAGE).tar.bz2  $(PACKAGE).spec /data1/OSC/home\:openschoolserver/$(PACKAGE); \
+	        cd /data1/OSC/home\:openschoolserver/$(PACKAGE); \
+	        osc vc; \
+	        osc ci -m "New Build Version"; \
+	fi 
+	echo $(NRELEASE) > RELEASE
+	git commit -a -m "New release"
+	git push
 

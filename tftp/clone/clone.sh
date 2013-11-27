@@ -519,6 +519,11 @@ clone()
 {    
     #Save the master boot record and the partition settings of the drivers
     mkdir -p /mnt/itool/images/$HW/$PARTITION-Unattended/
+    if [ ! -d /mnt/itool/images/$HW/$PARTITION-Unattended/ ]
+    then
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" --title "\Zb\Z1Error" --msgbox "Der angemeldete Benutzer hat keine Rechte in /srv/itool/images." 10 70
+    fi
+
     for HD in $HDs 
     do
         dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=62 bs=512 > /dev/null 2>&1
