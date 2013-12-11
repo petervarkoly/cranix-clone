@@ -146,7 +146,7 @@ cls ()
 restart()
 {
 	umount /mnt/itool
-	reboot -f
+	exit 0
 }
 
 ################################
@@ -780,7 +780,6 @@ if [ "$MODUS" = "AUTO" ]; then
     if [ "$PARTITIONS" = "MBR" ]; then
         mbr
         restart
-	exit
     fi
     IFS=","
     for i in $PARTITIONS
@@ -792,7 +791,6 @@ if [ "$MODUS" = "AUTO" ]; then
     initialize_disks
     restore_partitions
     restart
-    exit
 fi
 
 # Get Username and Password
@@ -890,12 +888,11 @@ do
 			case $? in
 			0)
 				restart
-				exit
 			;;
 			3)
 				umount /mnt/itool
-				poweroff -f
-				exit
+				echo 'root: halt' > /etc/yast.inf
+				exit 0
 			;;
 			*)
 			esac
