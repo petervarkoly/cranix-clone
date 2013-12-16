@@ -35,7 +35,7 @@ fi
 if [ -z "${NIC}" ]
 then
         NIC=$( ls /var/lib/dhcpcd/dhcpcd-*info )
-	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.)info/\1/' )
+	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.*).info/\1/' )
 fi
 
 . /var/lib/dhcpcd/dhcpcd-${NIC}.info
