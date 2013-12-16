@@ -34,15 +34,16 @@ fi
 ## if no nic was defined set it to eth0
 if [ -z "${NIC}" ]
 then
-        export NIC="eth0"
+        NIC=$( ls /var/lib/dhcpcd/dhcpcd-*info )
+	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.)info/\1/' )
 fi
 
+. /var/lib/dhcpcd/dhcpcd-${NIC}.info
 if [ -z "${SLEEP}" ]
 then
         export SLEEP=1
 fi
 
-/var/lib/dhcpcd/dhcpcd-${NIC}.info
 
 export HOSTNAME=${HOSTNAME%%.*}
 
