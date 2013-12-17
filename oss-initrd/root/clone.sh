@@ -7,9 +7,9 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="3.2.0"
+                                IVERSION="3.4.1"
 
-                                IBUILD="22.10.2011"
+                                IBUILD="18.12.2013"
 #
 ###############################################################################
 
@@ -88,7 +88,7 @@ saveimage ()
 			echo "#    Das erstellen des Images wurde gestartet.  #"
 			echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 			echo "#################################################"
-                        /bin/dd_rescue -y 0 -f -a $1 $2
+                        /bin/dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
 			sync
                 ;;
         esac
@@ -129,7 +129,11 @@ restore ()
 			fi
                 ;;
                 dd_rescue)
-                        /bin/dd_rescue $2 $1
+			if [ "$MULTICAST" ]; then
+                        	udp-receiver --nokbd 2> /dev/null | gunzip | /bin/dd_rescue /dev/stdin $1
+			else
+                        	cat $2 | gunzip | /bin/dd_rescue /dev/stdin $1
+			fi
                 ;;
         esac
 	milestone "End restore $1,$2,$3,$TOOL"
@@ -146,6 +150,7 @@ cls ()
 restart()
 {
 	umount /mnt/itool
+	sleep 2
 	exit 0
 }
 
@@ -198,6 +203,12 @@ man_part()
         return
    fi
    PARTITION=$(cat /tmp/itool.input)
+   for HD in $HDs 
+   do
+   	if [  grep $HD /tmp/itool.input ]; then
+		break;
+	fi
+   done
 
    dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup/Restore der Partition $PARTITION" \
           --menu "Bitte waehlen Sie den gewuenschten modus" 20 50 4 "Backup" "Partition speichern" "Restore" "Partition wiederherstellen" 2> /tmp/itool.input
@@ -223,6 +234,16 @@ man_part()
 		dd	  "dd"        off \
 		2> /tmp/itool.input
 	TOOL=$(cat /tmp/itool.input)
+	#Ask for mbr
+	dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup der Partition $PARTITION nach $NAME" \
+		--nocancel --radiolist "Partitionierung speichern?" 10 80 4 \
+		yes "Ja" on \
+		no  "Nein" off \
+		2> /tmp/itool.input
+	MBR=$(cat /tmp/itool.input)
+	if [ $MBR = "yes" ]; then
+		dd of=/mnt/itool/images/manual/$NAME.parting if=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+	fi
         saveimage $PARTITION  /mnt/itool/images/manual/$NAME.img $TOOL
         chmod 775 /mnt/itool/images/manual/$NAME.img
         sleep $SLEEP
@@ -250,6 +271,18 @@ man_part()
                 return
         fi
         NAME=$(cat /tmp/itool.input)
+	if [ -e /mnt/itool/images/manual/$NAME.parting ]; then
+		#Ask for mbr
+		dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup der Partition $PARTITION nach $NAME" \
+			--nocancel --radiolist "Partitionierung wiederherstellen?" 10 80 4 \
+			yes "Ja" on \
+			no  "Nein" off \
+			2> /tmp/itool.input
+		MBR=$(cat /tmp/itool.input)
+		if [ $MBR = "yes" ]; then
+			dd if=/mnt/itool/images/manual/$NAME.parting of=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+		fi
+	fi 
         dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup einer Partition" \
                --infobox "Partimage wird gestartet. Bitte warten!" 10 60
 	restore $PARTITION /mnt/itool/images/manual/$NAME.img
@@ -880,7 +913,6 @@ do
 			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 				--title     "\Zb\Z1Beenden" \
 				--ok-label  "Neu starten" \
-				--extra-button --extra-label "Herunterfahren" \
 				--cancel-label "Abbrechen" \
 				--menu      "\nMoechten Sie das Clone Tool wirklich verlassen?\n\n\n " 15 60 1\
 				            "" "> Aktuell verbunden mit ${SERVER} <"
@@ -888,11 +920,6 @@ do
 			case $? in
 			0)
 				restart
-			;;
-			3)
-				umount /mnt/itool
-				echo 'root: halt' > /etc/yast.inf
-				exit 0
 			;;
 			*)
 			esac
