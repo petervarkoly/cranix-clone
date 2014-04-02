@@ -54,4 +54,7 @@ exit 0
 %files
 %defattr(-,root,root)
 %config /etc/xinetd.d/*
-
+/srv/*
+/usr/share/oss/templates/pxeboot.in
+%defattr(-,root,root)
+/usr/sbin/*

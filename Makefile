@@ -35,9 +35,10 @@ install:
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/hwinfo
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
 	
-	install -m 444 config/*templ           $(DESTDIR)/srv/itool/config
-	install -m 444 config/*bat             $(DESTDIR)/srv/itool/config
-	install -m 400 config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
+	install -m 444 $(INSTUSER) config/xinetd.d.tftp.in $(DESTDIR)/etc/xinetd.d/tftp.in
+	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
+	install -m 444 $(INSTUSER) config/*bat             $(DESTDIR)/srv/itool/config
+	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
