@@ -35,6 +35,8 @@ install:
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/hwinfo
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
 	
+	mkdir -p $(DESTDIR)/etc/xinetd.d/
+	mkdir -p $(DESTDIR)/srv/itool/config/
 	install -m 444 $(INSTUSER) config/xinetd.d.tftp.in $(DESTDIR)/etc/xinetd.d/tftp.in
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*bat             $(DESTDIR)/srv/itool/config
