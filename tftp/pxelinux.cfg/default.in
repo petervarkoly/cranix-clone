@@ -1,0 +1,25 @@
+default	        menu.c32
+KBDMAP		german.kbd
+timeout		100
+prompt		0
+allowoptions	1
+noescape	0
+ui              gfxboot bootlogo
+
+menu master passwd SHA1PASS
+menu title OpenSchoolServer V3.4 PXE Boot Enviroment
+
+LABEL Festplatte
+    LOCALBOOT 0
+
+LABEL CloneTool
+        kernel boot/linux
+        append initrd=boot/initrd vga=normal ramdisk_size=512000 ramdisk_blocksize=4096 kiwiserver=192.168.0.254 STARTCMD=clone SLEEP=1 ITOOL=partimage
+        IPAPPEND 2
+
+#LABEL SUSE Linux Autoinstallation
+#      CONFIG pxelinux.cfg/autoyast
+
+#LABEL 64bit SUSE Linux Autoinstallation
+#      CONFIG pxelinux.cfg/autoyast64
+

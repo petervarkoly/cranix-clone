@@ -1,0 +1,8 @@
+Locale: de_DE
+Textmode: 1
+UseDHCP: 1
+KernelPCMCIA: 0
+UseUSBSCSI: 0
+Keytable: de-latin1
+Language: de_DE
+NoShell: 1
