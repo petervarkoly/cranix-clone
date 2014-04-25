@@ -31,21 +31,24 @@ fi
 ## if no nic was defined set it to eth0
 if [ -z "${NIC}" ]
 then
-        export NIC="eth0"
+        NIC=$( ls /var/lib/dhcpcd/dhcpcd-*info )
+	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.*).info/\1/' )
 fi
 
+. /var/lib/dhcpcd/dhcpcd-${NIC}.info
 if [ -z "${SLEEP}" ]
 then
         export SLEEP=1
 fi
 
-. /var/lib/dhcpcd/dhcpcd-${NIC}.info
 
 export HOSTNAME=${HOSTNAME%%.*}
 
 if [ "$MODUS" = "AUTO" ]
 then
-    mount -t cifs -o username=${HOSTNAME},password=${HOSTNAME},netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool
+    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
+    mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool
+    sleep $SLEEP
     if [ -d /mnt/itool/ROOT ]
     then
 	if [ -z "$NOCOPY" ]
@@ -54,18 +57,17 @@ then
 	fi
 	sleep $SLEEP
         . /root/${STARTCMD}.sh
-        exit
+        exit 0
     else
     	dialog  --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
     	if [ $? -ne 0 ]
     	then
     	    clear
-    	    reboot -f
-    	    sleep 30
+    	    exit 0
 	else
 	    export MODUS=""
 	    /root/login
-	    exit
+	    exit 0
     	fi
     fi
 else
@@ -76,8 +78,7 @@ else
         if [ $? -eq 1 ]
         then
 		clear
-		reboot -f
-		sleep 30
+		exit 0
         else
     	USERNAME=$(cat /tmp/username)
 	USERNAME=$(echo $USERNAME | tr '[:upper:]' '[:lower:]' 2>/dev/null)
@@ -95,6 +96,7 @@ else
 	    echo -n "username=" > /tmp/credentials; cat /tmp/username >> /tmp/credentials;
 	    echo >> /tmp/credentials;
 	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
+	    chmod 600 /tmp/credentials
     	    
     	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
     	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
@@ -108,18 +110,16 @@ else
     		fi
 		sleep $SLEEP
     		. /root/${STARTCMD}.sh
-    		exit
+    		exit 0
     	    else
     		umount /mnt/itool
-    		sleep 5
+    		sleep $SLEEP
     		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
     	    
     		if [ $? -ne 0 ]
     		then
 			clear
-#			reboot -f
-#			sleep 30
-			exit
+			exit 0	
     		fi
     	    fi
     	fi
