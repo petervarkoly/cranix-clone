@@ -1,0 +1,60 @@
+#
+# Spec file for oss-clone (@VERSION@)
+# Copyright (c) 2014 Peter Varkoly <peter@varkoly.de> Nürnberg, Germany.  All rights reserved.
+#
+
+Name:		oss-clone
+Summary:	OSS boot environment for cloning clients
+Version:	@VERSION@
+Release:	@RELEASE@
+License:	Commercial
+Vendor:		EXTIS GmbH, Uttenreuth, Germany
+Distribution:	SLE11
+Packager:	peter@varkoly.de
+Group:		Productivity/
+Source:		%{name}.tar.bz2
+BuildArch:	noarch
+BuildRequires:	unzip openschool-base
+BuildRoot:    %{_tmppath}/%{name}-root
+Requires:	openschool-base
+
+%description
+This package provides a boot environment based on the openSUSE installation initrd for cloning clients.
+
+Authors:
+--------
+        peter@varkoly.de
+
+%prep
+%setup -n %{name}
+
+%build
+# just here to be complete
+
+%install
+make DESTDIR=%{buildroot} install
+
+%post
+
+# setup rights
+if [ -d /home/sysadmins/admin ]
+then
+   chmod     755      /srv/itool
+   chgrp -R sysadmins /srv/itool
+   chmod    2755      /srv/itool/config
+   chmod    2775      /srv/itool/hwinfo
+   chmod -R 2775      /srv/itool/images
+   chmod -R 755       /srv/itool/ROOT
+/usr/sbin/oss_setup_pxe_enviroment.sh &> /dev/null
+fi
+exit 0
+
+%postun
+
+%files
+%defattr(-,root,root)
+%config /etc/xinetd.d/*
+/srv/*
+/usr/share/oss/templates/pxeboot.in
+%defattr(-,root,root)
+/usr/sbin/*
