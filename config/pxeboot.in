@@ -7,3 +7,10 @@ LABEL	cloneTool
         kernel clone/linux
         append initrd=clone/initrd install=exec:/bin/start_itool MemLimit=10 MemYASTText=10 Info=tftp://install/linuxrc.config ITOOL=partimage STARTCMD=clone SLEEP=1 apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe PARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1
         IPAPPEND 2
+
+#Templat for kiwiClonTool
+#LABEL   cloneTool
+#        kernel boot/linux
+#        append initrd=boot/initrd vga=normal ramdisk_size=512000 ramdisk_blocksize=4096 ITOOL=partimage STARTCMD=clone PARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1
+#        IPAPPEND 2
+
