@@ -43,9 +43,10 @@ then
    chgrp -R sysadmins /srv/itool
    chmod    2755      /srv/itool/config
    chmod    2775      /srv/itool/hwinfo
+   setfacl -m g:WORKSTATIONS:rwx  /srv/itool/hwinfo
    chmod -R 2775      /srv/itool/images
    chmod -R 755       /srv/itool/ROOT
-/usr/sbin/oss_setup_pxe_enviroment.sh &> /dev/null
+   /usr/sbin/oss_setup_pxe_enviroment.sh &> /dev/null
 fi
 exit 0
 
