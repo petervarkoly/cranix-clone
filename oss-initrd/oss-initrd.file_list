@@ -1,0 +1,68 @@
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#
+# oss itool extra packages
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+atftp:
+    /usr/bin/atftp
+
+coreutils:
+    /bin/cp
+    /bin/df
+    /bin/mkdir
+    /bin/rm
+    /usr/bin/basename
+    /usr/bin/date
+    /usr/bin/dd
+    /usr/bin/ls
+    /usr/bin/tr
+    /usr/bin/touch
+
+dialog:
+
+dd_rescue:
+
+gawk:
+
+grep:
+
+gptfdisk:
+   /usr/sbin/sgdisk
+
+joe:
+
+newt:
+
+ntfsprogs:
+
+openldap2-client:
+
+parted:
+
+partimage:
+
+rsync:
+
+openssh:
+ /usr/sbin/sshd
+ /usr/bin/ssh-keygen
+
+udpcast:
+
+util-linux:
+  /sbin/fdisk
+  /usr/sbin/sfdisk
+  /usr/sbin/fdisk
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#
+# oss extra scripts and config files
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+e mkdir -p -m 700 root/.ssh/
+x bin/*                     bin/
+x root/*                    root/
+x etc/openldap/ldap.conf    etc/openldap/ldap.conf
+x etc/ssh/sshd_config       etc/ssh/sshd_config
+x root/.ssh/authorized_keys root/.ssh/authorized_keys
