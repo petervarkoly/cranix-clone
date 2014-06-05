@@ -7,10 +7,10 @@ atftp:
     /usr/bin/atftp
 
 coreutils:
-    /bin/cp
-    /bin/df
-    /bin/mkdir
-    /bin/rm
+    /usr/bin/cp
+    /usr/bin/df
+    /usr/bin/mkdir
+    /usr/bin/rm
     /usr/bin/basename
     /usr/bin/date
     /usr/bin/dd
