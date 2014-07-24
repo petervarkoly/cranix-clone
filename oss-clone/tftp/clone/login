@@ -46,8 +46,8 @@ export HOSTNAME=${HOSTNAME%%.*}
 
 if [ "$MODUS" = "AUTO" ]
 then
-    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //${SERVER}/itool /mnt/itool" > /tmp/login
-    mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //${SERVER}/itool /mnt/itool
+    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
+    mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool
     sleep $SLEEP
     if [ -d /mnt/itool/ROOT ]
     then
@@ -98,7 +98,7 @@ else
 	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
 	    chmod 600 /tmp/credentials
     	    
-    	    mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
+    	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
     	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     	    then
     		if [ -d /mnt/itool/ROOT ]

@@ -677,9 +677,6 @@ make_autoconfig()
 			if [ ${JOIN} = "Domain" ]; then
 				cp /mnt/itool/config/${OS}DomainJoin.bat /mnt/$PARTITION/script/domainjoin.bat
 			fi
-			if [ -e /mnt/itool/images/$HW/$PARTITION-domainjoin.bat ]; then
-				cp /mnt/itool/images/$HW/$PARTITION-domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
-			fi
 			sed -i s/HOSTNAME/${HOSTNAME}/   /mnt/$PARTITION/script/domainjoin.bat
 			sed -i s/WORKGROUP/${WORKGROUP}/ /mnt/$PARTITION/script/domainjoin.bat
 			if [ ${JOIN} = "Simple" ]; then
@@ -744,7 +741,7 @@ restore_partitions()
 	else
 		dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
-			--msgbox "Die Imagedatei existiert nicht:\n //${SERVER}/itool/images/$HW/$PARTITION.img" 17 60
+			--msgbox "Die Imagedatei existiert nicht:\n //install/itool/images/$HW/$PARTITION.img" 17 60
 	fi
 	sleep $SLEEP
         milestone "End  restore_partitions $PARTITION"
