@@ -28,13 +28,20 @@ then
 	/usr/bin/ssh-keygen -t rsa  -b 1024 -f /etc/ssh/ssh_host_rsa_key -N ''
 	/usr/sbin/sshd -q
 fi
+
+## Check for some boot parameter
+if [ -z "${SERVER}" ]
+then
+        export SERVER="install"
+fi
+
 echo "tftp             69/tcp    # Trivial File Transfer
 tftp             69/udp    # Trivial File Transfer" >> /etc/services
-atftp -g -r clone/login -l cloneToolLogin install
+atftp -g -r clone/login -l cloneToolLogin ${SERVER}
 if [ -s cloneToolLogin ]; then
 	mv cloneToolLogin /root/login
 fi
-atftp -g -r clone/clone.sh -l cloneTool install
+atftp -g -r clone/clone.sh -l cloneTool ${SERVER}
 if [ -s cloneTool ]; then
 	mv cloneTool /root/clone.sh
 fi

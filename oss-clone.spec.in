@@ -40,13 +40,24 @@ make DESTDIR=%{buildroot} install
 if [ -d /home/sysadmins/admin ]
 then
    chmod     755      /srv/itool
-   chgrp -R sysadmins /srv/itool
+   chgrp -R SYSADMINS /srv/itool
    chmod    2755      /srv/itool/config
    chmod    2775      /srv/itool/hwinfo
    setfacl -m g:WORKSTATIONS:rwx  /srv/itool/hwinfo
    chmod -R 2775      /srv/itool/images
+   setfacl -m g:SYSADMINS:rwx  /srv/itool/images
    chmod -R 755       /srv/itool/ROOT
    /usr/sbin/oss_setup_pxe_enviroment.sh &> /dev/null
+   DATE=`date +%Y-%m-%d:%H-%M`
+   if [ -e /etc/xinetd.d/tftp ]
+   then
+     cp /etc/xinetd.d/tftp /etc/xinetd.d/tftp.$DATE
+   fi
+   cp /etc/xinetd.d/tftp.in /etc/xinetd.d/tftp
+   if [ ! -e /usr/share/oss/templates/pxeboot ]
+   then
+       cp /usr/share/oss/templates/pxeboot.in /usr/share/oss/templates/pxeboot
+   fi
 fi
 exit 0
 

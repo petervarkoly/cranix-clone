@@ -96,7 +96,7 @@ else
 	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
 	    chmod 600 /tmp/credentials
     	    
-    	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
+    	    mount -t cifs -o credentials=/tmp/credentials //$SERVER/itool /mnt/itool
     	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     	    then
     		if [ -d /mnt/itool/ROOT ]

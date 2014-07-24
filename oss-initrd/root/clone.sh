@@ -734,7 +734,7 @@ restore_partitions()
 	else
 		dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
-			--msgbox "Die Imagedatei existiert nicht:\n //install/itool/images/$HW/$PARTITION.img" 17 60
+			--msgbox "Die Imagedatei existiert nicht:\n //$SERVER/itool/images/$HW/$PARTITION.img" 17 60
 	fi
 	sleep $SLEEP
         milestone "End  restore_partitions $PARTITION"
