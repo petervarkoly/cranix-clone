@@ -1,0 +1,128 @@
+#!/bin/bash
+trap "" 0 1 2 5 15
+
+mkdir -p /mnt/{hdr,hdp,itool}
+umount /mnt/itool > /dev/null 2>&1
+rm -Rf /tmp/* > /dev/null 2>&1
+
+WARNING='Anmeldung am System war nicht moeglich!\n\n
+Dies koennte mehrere Gruende haben.\n\n
+ - Falscher Benutzername\n
+ - Falsches Passwort\n
+ - Fehlerhafte Konfiguration des Server\n
+ - Keine Verbindung zum Server\n\n\n
+Moechten Sie es erneut versuchen?'
+
+## Check for some boot parameter
+if [ -z "${ITOOL}" ]
+then
+        export ITOOL="partimage"
+fi
+## Check for some boot parameter
+if [ -z "${STARTCMD}" ]
+then
+        export STARTCMD="clone"
+fi
+## Check for some boot parameter
+if [ -z "${SERVER}" ]
+then
+        export SERVER="install"
+fi
+## if no nic was defined set it to eth0
+if [ -z "${NIC}" ]
+then
+        NIC=$( ls /var/lib/dhcpcd/dhcpcd-*info )
+	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.*).info/\1/' )
+fi
+
+. /var/lib/dhcpcd/dhcpcd-${NIC}.info
+if [ -z "${SLEEP}" ]
+then
+        export SLEEP=1
+fi
+
+
+export HOSTNAME=${HOSTNAME%%.*}
+
+if [ "$MODUS" = "AUTO" ]
+then
+    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //${SERVER}/itool /mnt/itool" > /tmp/login
+    mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //${SERVER}/itool /mnt/itool
+    sleep $SLEEP
+    if [ -d /mnt/itool/ROOT ]
+    then
+	if [ -z "$NOCOPY" ]
+	then	
+            cp -a /mnt/itool/ROOT/* /
+	fi
+	sleep $SLEEP
+        . /root/${STARTCMD}.sh
+        exit 0
+    else
+    	dialog  --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
+    	if [ $? -ne 0 ]
+    	then
+    	    clear
+    	    exit 0
+	else
+	    export MODUS=""
+	    /root/login
+	    exit 0
+    	fi
+    fi
+else
+    while test -e /tmp
+    do
+        dialog --backtitle "${STARTCMD}" --title "Anmeldung" --cancel-label "Beenden" --inputbox "Bitte geben Sie Ihren Benutzernamen ein:\n" 10 60 2> /tmp/username
+        
+        if [ $? -eq 1 ]
+        then
+		clear
+		exit 0
+        else
+    	USERNAME=$(cat /tmp/username)
+	USERNAME=$(echo $USERNAME | tr '[:upper:]' '[:lower:]' 2>/dev/null)
+        
+    	if [ ! "$USERNAME" ]
+    	then
+    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Der Benutzername $USERNAME ist ungueltig!" 15 60
+    	elif [ "$USERNAME" = "root" -o "$USERNAME" = "administrator" ]
+    	then
+    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Die Anmeldung an cloneTool als $USERNAME ist nicht möglich!" 15 60
+    	else
+    	    dialog --backtitle "${STARTCMD}" --title "Anmeldung" --no-cancel \
+		   --insecure --passwordbox "Bitte geben Sie das Passwort fuer $USERNAME ein:\n" 10 60 2> /tmp/userpassword
+
+	    echo -n "username=" > /tmp/credentials; cat /tmp/username >> /tmp/credentials;
+	    echo >> /tmp/credentials;
+	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
+	    chmod 600 /tmp/credentials
+    	    
+    	    mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
+    	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
+    	    then
+    		if [ -d /mnt/itool/ROOT ]
+    		then
+		    if [ -z "$NOCOPY" ]
+		    then	
+		        cp -a /mnt/itool/ROOT/* /
+		    fi
+    		fi
+		sleep $SLEEP
+    		. /root/${STARTCMD}.sh
+    		exit 0
+    	    else
+    		umount /mnt/itool
+    		sleep $SLEEP
+    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
+    	    
+    		if [ $? -ne 0 ]
+    		then
+			clear
+			exit 0	
+    		fi
+    	    fi
+    	fi
+        fi
+    done
+fi
