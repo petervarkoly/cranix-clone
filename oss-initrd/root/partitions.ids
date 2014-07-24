@@ -1,0 +1,138 @@
+024DEE41-33E7-11D3-9D69-0008C781F39F:MBR
+C12A7328-F81F-11D2-BA4B-00A0C93EC93B:EFI-Systempartition
+21686148-6449-6E6F-744E-656564454649:BIOS-Bootpartition
+E3C9E316-0B5C-4DB8-817D-F92DF00215AE:Windows von Microsoft reservierte Partition (MSR)
+DE94BBA4-06D1-4D40-A16A-BFD50179D6AC:Windows Microsoft Wiederherstellungspartition
+EBD0A0A2-B9E5-4433-87C0-68B6B72699C7:Windows Basic Data Partition
+5808C8AA-7E8F-42E0-85D2-E1E90434CFB3:Windows Logical Disk Manager Partition für Meta-Daten
+AF9B60A0-1431-4F62-BC68-3311714A69AD:Windows Logical Disk Manager Partition für Daten
+75894C1E-3AEB-11D3-B7C1-7B03A0000000:HP-UX Partition für HP-UX-LVM
+E2A1E728-32E3-11D6-A682-7B03A0000000:HP-UX Service Partition
+EBD0A0A2-B9E5-4433-87C0-68B6B72699C7:Linux Data partition (veraltet)
+0FC63DAF-8483-4772-8E79-3D69D8477DE4:Linux Data partition (neu)
+A19D880F-05FC-4D3B-A006-743F0F84911E:Linux RAID partition
+0657FD6D-A4AB-43C4-84E5-0933C84B4F4F:Linux Swap partition
+E6D6D379-F507-44C2-A23C-238F2A3DF928:Linux Partition für Linux-LVM
+8DA63339-0007-60C0-C436-083AC8230908:Linux Reserved
+516E7CB4-6ECF-11D6-8FF8-00022D09712B:FreeBSD Data partition
+516E7CB5-6ECF-11D6-8FF8-00022D09712B:FreeBSD Swap partition
+516E7CB6-6ECF-11D6-8FF8-00022D09712B:FreeBSD Unix File System (UFS) partition
+516E7CB8-6ECF-11D6-8FF8-00022D09712B:FreeBSD LVM (Vinum)
+516E7CBA-6ECF-11D6-8FF8-00022D09712B:FreeBSD ZFS partition
+48465300-0000-11AA-AA11-00306543ECAC:Mac OS X Partition für Hierarchical File System (HFS+)
+55465300-0000-11AA-AA11-00306543ECAC:Mac OS X Partition für UFS
+53746F72-6167-11AA-AA11-00306543ECAC:Mac OS X Partition für CoreStorage (verschlüsselt)
+426F6F74-0000-11AA-AA11-00306543ECAC:Mac OS X Partition für Boot-Unterstützung
+52414944-0000-11AA-AA11-00306543ECAC:Mac OS X Partition für Software-RAID
+5265636F-7665-11AA-AA11-00306543ECAC:Mac OS X Partition für Apple TV Recovery
+6A82CB45-1DD2-11B2-99A6-080020736631:Solaris Boot partition
+6A85CF4D-1DD2-11B2-99A6-080020736631:Solaris Root partition
+6A87C46F-1DD2-11B2-99A6-080020736631:Solaris Swap partition
+6A8B642B-1DD2-11B2-99A6-080020736631:Solaris Backup partition
+6A898CC3-1DD2-11B2-99A6-080020736631:Solaris /usr partition
+6A8EF2E9-1DD2-11B2-99A6-080020736631:Solaris /var partition
+6A90BA39-1DD2-11B2-99A6-080020736631:Solaris /home partition
+6A9283A5-1DD2-11B2-99A6-080020736631:Solaris EFI_ALTSCTR
+6A945A3B-1DD2-11B2-99A6-080020736631:Solaris Reservierte Partition
+6A9630D1-1DD2-11B2-99A6-080020736631:Solaris Reservierte Partition
+6A980767-1DD2-11B2-99A6-080020736631:Solaris Reservierte Partition
+6A96237F-1DD2-11B2-99A6-080020736631:Solaris Reservierte Partition
+6A8D2AC7-1DD2-11B2-99A6-080020736631:Solaris Reservierte Partition
+0x00:Empty             
+0x01:FAT12             
+0x02:XENIX root        
+0x03:XENIX usr         
+0x04:FAT16 <32M        
+0x05:Extended          
+0x06:FAT16             
+0x07:HPFS/NTFS/exFAT   
+0x08:AIX               
+0x09:AIX bootable      
+0x0a:OS/2 Boot Manag   
+0x0b:W95 FAT32         
+0x0c:W95 FAT32 (LBA)   
+0x0e:W95 FAT16 (LBA)   
+0x0f:W95 Ext'd (LBA)   
+0x10:OPUS              
+0x11:Hidden FAT12      
+0x12:Compaq diagnost   
+0x14:Hidden FAT16 <3   
+0x16:Hidden FAT16      
+0x17:Hidden HPFS/NTF   
+0x18:AST SmartSleep    
+0x1b:Hidden W95 FAT3   
+0x1c:Hidden W95 FAT3   
+0x1e:Hidden W95 FAT1
+0x24:NEC DOS        
+0x27:Hidden NTFS Win
+0x39:Plan 9         
+0x3c:PartitionMagic 
+0x40:Venix 80286    
+0x41:PPC PReP Boot  
+0x42:SFS            
+0x4d:QNX4.x         
+0x4e:QNX4.x 2nd part
+0x4f:QNX4.x 3rd part
+0x50:OnTrack DM     
+0x51:OnTrack DM6 Aux
+0x52:CP/M           
+0x53:OnTrack DM6 Aux
+0x54:OnTrackDM6     
+0x55:EZ-Drive       
+0x56:Golden Bow     
+0x5c:Priam Edisk    
+0x61:SpeedStor      
+0x63:GNU HURD or Sys
+0x64:Novell Netware 
+0x65:Novell Netware 
+0x70:DiskSecure Mult
+0x75:PC/IX          
+0x80:Old Minix     
+0x81:Minix / old Lin
+0x82:Linux swap / So
+0x83:Linux          
+0x84:OS/2 hidden C: 
+0x85:Linux extended 
+0x86:NTFS volume set
+0x87:NTFS volume set
+0x88:Linux plaintext
+0x8e:Linux LVM      
+0x93:Amoeba         
+0x94:Amoeba BBT     
+0x9f:BSD/OS         
+0xa0:IBM Thinkpad hi
+0xa5:FreeBSD        
+0xa6:OpenBSD        
+0xa7:NeXTSTEP       
+0xa8:Darwin UFS     
+0xa9:NetBSD         
+0xab:Darwin boot    
+0xaf:HFS / HFS+     
+0xb7:BSDI fs        
+0xb8:BSDI swap      
+0xbb:Boot Wizard hid
+0xbe:Solaris boot   
+0xbf:Solaris        
+0xc1:DRDOS/sec (FAT-
+0xc4:DRDOS/sec (FAT-
+0xc6:DRDOS/sec (FAT-
+0xc7:Syrinx         
+0xda:Non-FS data    
+0xdb:CP/M / CTOS / .
+0xde:Dell Utility   
+0xdf:BootIt         
+0xe1:DOS access     
+0xe3:DOS R/O        
+0xe4:SpeedStor      
+0xeb:BeOS fs        
+0xee:GPT            
+0xef:EFI (FAT-12/16/
+0xf0:Linux/PA-RISC b
+0xf1:SpeedStor      
+0xf4:SpeedStor      
+0xf2:DOS secondary  
+0xfb:VMware VMFS    
+0xfc:VMware VMKCORE 
+0xfd:Linux raid auto
+0xfe:LANstep        
+0xff:BBT            
