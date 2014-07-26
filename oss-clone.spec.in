@@ -58,6 +58,10 @@ then
    then
        cp /usr/share/oss/templates/pxeboot.in /usr/share/oss/templates/pxeboot
    fi
+   if [ ! -e /usr/share/oss/templates/eliloboot ]
+   then
+       cp /usr/share/oss/templates/eliloboot.in /usr/share/oss/templates/eliloboot
+   fi
 fi
 exit 0
 

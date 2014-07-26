@@ -11,12 +11,14 @@ install:
 	#configure tftp boot template service
 	mkdir -p $(DESTDIR)/usr/share/oss/templates
 	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/oss/templates/pxeboot.in
+	install -m 444 $(INSTUSER)  config/eliloboot.in          $(DESTDIR)/usr/share/oss/templates/eliloboot.in
 
 	#configure tftp service
 	mkdir -p $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
 	install -m 444 $(INSTUSER)  tftp/german.kbd               $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/bootlogo                 $(DESTDIR)/srv/tftp/bootlogo
+	install -m 444 $(INSTUSER)  tftp/bootmenu                 $(DESTDIR)/srv/tftp/bootmenu
 	install -m 444 $(INSTUSER)  tftp/chain.c32                $(DESTDIR)/srv/tftp/chain.c32
 	install -m 444 $(INSTUSER)  tftp/clouds.jpg               $(DESTDIR)/srv/tftp/clouds.jpg
 	install -m 444 $(INSTUSER)  tftp/font.fnt                 $(DESTDIR)/srv/tftp/font.fnt
