@@ -52,6 +52,13 @@ sub write_host_pxe_config
        $pxeboot =~ s/ MULTICAST=1//;
    }    
    write_file('/srv/tftp/pxelinux.cfg/'.$mac,$pxeboot);
+   my $eliloboo = get_file("/usr/share/oss/templates/eliloboot");
+   $pxeboot =~ s/#PARTITIONS#/$partitions/;
+   if( !$MULTICAST )
+   {
+       $pxeboot =~ s/ MULTICAST=1//;
+   }    
+   write_file('/srv/tftp/.cfg/'.uc($mac).'.conf',$pxeboot);
 }
 
 # Initialisierung
