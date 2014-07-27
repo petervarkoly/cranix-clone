@@ -58,7 +58,7 @@ sub write_host_pxe_config
    {
        $pxeboot =~ s/ MULTICAST=1//;
    }    
-   write_file('/srv/tftp/.cfg/'.uc($mac).'.conf',$pxeboot);
+   write_file('/srv/tftp/'.uc($mac).'.conf',$pxeboot);
 }
 
 # Initialisierung
