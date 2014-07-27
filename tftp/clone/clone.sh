@@ -7,9 +7,9 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="3.4.1"
+                                IVERSION="3.4.2"
 
-                                IBUILD="25.04.2014"
+                                IBUILD="27.07.2014"
 #
 ###############################################################################
 
@@ -189,12 +189,14 @@ helpme ()
 #####################################
 man_part()
 {
-   fdisk -l 2>/dev/null | grep '^/dev/' | sed 's/*//' | sed 's/+//' > /tmp/fdiskl
-   sed -i 's/W95 /W95-/g' /tmp/fdiskl
-   sed -i '/Linux swap/d' /tmp/fdiskl
-   sed -i '/Ext/d'  /tmp/fdiskl
-   sed -i 's/  */:/g' /tmp/fdiskl
-   gawk -F : '{ printf("\"%s\" \"%iMB %s\" ",$1,$4/1024,$6) }' /tmp/fdiskl > /tmp/partitions
+   [ -e /tmp/disklist ]   && rm -f /tmp/disklist
+   [ -e /tmp/partitions ] && rm -f /tmp/partitions
+   for i in $HDs
+   do
+      parted -m -s /dev/$i print >> /tmp/disklist
+      echo '/^[0-9]/ { printf("\"%s%i\" \"%s\t%s\t%s\" ","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
+      gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/partitions
+   done
    echo -n 'dialog --colors --backtitle "CloneTool - '${IVERSION}'" --title "Manuelles Backup/Restore einer Partition" --menu  "Zur Verfuegung stehende Partitionen:" 20 50 8 ' > /tmp/command
    cat /tmp/partitions >> /tmp/command
    echo ' 2> /tmp/itool.input' >> /tmp/command
@@ -294,23 +296,27 @@ select_partitions()
     # This funciton get the list of the avaiable partitions and starts an
     # checklist dialog to select the partitions to clone or to restore.
     # This will be saved into the file /tmp/partitions
-    fdisk -l 2>/dev/null | grep '^/dev/' | sed 's/*//' | sed 's/+//' > /tmp/fdiskl
-    sed -i 's/W95 /W95-/g' /tmp/fdiskl
-    sed -i '/Linux swap/d' /tmp/fdiskl
-    sed -i '/Ext/d'  /tmp/fdiskl
-    sed -i 's/  */:/g' /tmp/fdiskl
-    sed -i 's#/dev/##g' /tmp/fdiskl
-    echo -n "" > /tmp/partitions
-    for i in `cat /tmp/fdiskl`
+    [ -e /tmp/disklist ]   && rm -f /tmp/disklist
+    [ -e /tmp/parts  ]     && rm -f /tmp/parts
+    [ -e /tmp/partitions ] && rm -f /tmp/partitions
+    for i in $HDs
+    do
+       parted -m -s /dev/$i print >> /tmp/disklist
+       echo '/^[0-9]/ { printf("%s%i:%s\t%s\t%s\n","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
+       gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/parts
+    done 
+    IFS=$'\n'
+    for i in `cat /tmp/parts`
     do
         part=$( echo "$i" | gawk -F : '{ print $1 }' )
 	desc=$( get_ldap $part DESC )
 	if [ "$desc" ]; then
 	    echo -n "$part \"$desc\" on " >> /tmp/partitions
 	else
-    	    echo $i | gawk -F : '{ printf("%s \"%iMB %s\" on ",$1,$4/1024,$6) }' >> /tmp/partitions
+    	    echo $i | gawk -F : '{ printf("%s \"%s\" on ",$1,$2) }' >> /tmp/partitions
 	fi
     done
+    unset IFS
     echo -n "dialog --colors --backtitle \"OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     cat /tmp/partitions >> /tmp/command
     echo ' 2> /tmp/partitions' >> /tmp/command
@@ -389,11 +395,11 @@ get_info()
     do
         desc=$( get_ldap $i DESC )
         if [ "$desc" ]; then
-            echo -n "$i $j 1 \"$desc\" $j 15 29 20 " >> /tmp/getdescriptions
+            echo -n "$i $j 1 \"$desc\" $j 10 40 40 " >> /tmp/getdescriptions
         else
 	    echo -n "$j:" > /tmp/myparts
-    	    grep "${i}:" /tmp/fdiskl >> /tmp/myparts
-    	    gawk -F : '{ printf("\"%s\" %i 1 \"%iMB %s\" %i 15 20 20 ",$2,$1,$5/1024,$7,$1) }' /tmp/myparts   >> /tmp/getdescriptions
+    	    grep "${i}:" /tmp/parts >> /tmp/myparts
+    	    gawk -F : '{ printf("\"%s\" %i 1 \"%s\" %i 10 40 40 ",$2,$1,$3,$1) }' /tmp/myparts   >> /tmp/getdescriptions
 	fi
 	j=$((j+1))
     done
@@ -554,7 +560,15 @@ clone()
     for HD in $HDs 
     do
         dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=62 bs=512 > /dev/null 2>&1
-	sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
+	PTTYPE=$(  parted -m -s /dev/$HD print | gawk -F : 'NR==2 { print  $6 }' )
+	case $PTTYPE in
+	    gpt)
+	      parted -m -s /dev/$HD unit s print > /mnt/itool/images/$HW/$HD.parted
+	      ;;
+	    *)
+	      sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
+	      ;;
+	esac    
     done
 
     #Now we save the selected partitions
@@ -611,11 +625,14 @@ initialize_disks()
 {
     for HD in $HDs 
     do
-	echo "sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk"
-	sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk
         echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=62 bs=512"
         dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=62 bs=512
 	sleep 5
+	if [ -e /mnt/itool/images/$HW/$HD.sfdisk ]
+	then
+		echo "sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk"
+		sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk
+	fi
     done
     #Activate swap partitions
     for i in $( fdisk -l | grep -i 'Linux swap' | gawk '{ print $1}' )

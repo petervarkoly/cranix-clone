@@ -71,6 +71,6 @@ exit 0
 %defattr(-,root,root)
 %config /etc/xinetd.d/*
 /srv/*
-/usr/share/oss/templates/pxeboot.in
+/usr/share/oss/templates/*.in
 %defattr(-,root,root)
 /usr/sbin/*
