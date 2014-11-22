@@ -4,7 +4,7 @@
 . /etc/sysconfig/schoolserver
 
 PASS=`/usr/sbin/oss_get_admin_pw`
-SHA1PASS=`/usr/share/oss/tools/sha1pass.pl $PASS`
+SHA1PASS=`/usr/share/oss/tools/sha1pass.pl --pass $PASS`
 DATE=`/usr/share/oss/tools/oss_date.sh`
 LANG=${RC_LANG:3:2}
 SCHOOLNAME=`echo "uid admin attributes o" | oss_get_user.pl text | grep '^o ' | sed 's/o //'`
