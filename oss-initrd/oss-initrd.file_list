@@ -41,6 +41,8 @@ parted:
 
 partimage:
 
+partclone:
+
 rsync:
 
 openssh:
