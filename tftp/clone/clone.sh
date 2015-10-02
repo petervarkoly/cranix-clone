@@ -88,7 +88,7 @@ saveimage ()
 			echo "#    Das erstellen des Images wurde gestartet.  #"
 			echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 			echo "#################################################"
-                        /bin/dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
+                        /usr/bin/dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
 			sync
                 ;;
         esac
@@ -130,9 +130,9 @@ restore ()
                 ;;
                 dd_rescue)
 			if [ "$MULTICAST" ]; then
-                        	udp-receiver --nokbd 2> /dev/null | gunzip | /bin/dd_rescue /dev/stdin $1
+                        	udp-receiver --nokbd 2> /dev/null | gunzip | /usr/bin/dd_rescue /dev/stdin $1
 			else
-                        	cat $2 | gunzip | /bin/dd_rescue /dev/stdin $1
+                        	cat $2 | gunzip | /usr/bin/dd_rescue /dev/stdin $1
 			fi
                 ;;
         esac
