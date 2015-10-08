@@ -23,13 +23,16 @@ dialog:
 dd_rescue:
 
 gawk:
+   /usr/bin/gawk
 
 grep:
+   /bin/grep
 
 gptfdisk:
    /usr/sbin/sgdisk
 
 joe:
+   /usr/bin/joe
 
 newt:
 
@@ -39,7 +42,7 @@ openldap2-client:
 
 parted:
 
-partimage:
+partclone:
 
 rsync:
 
