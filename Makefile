@@ -1,4 +1,4 @@
-VERSION         = $(shell test -e ../VERSION && cp ../VERSION VERSION ; cat VERSION)
+VERSION         = $(shell cat VERSION)
 RELEASE         = $(shell cat RELEASE)
 NRELEASE        = $(shell echo $(RELEASE) + 1 | bc )
 HERE            = $(shell pwd)
@@ -77,4 +77,6 @@ dist:
 	echo $(NRELEASE) > RELEASE
 	git commit -a -m "New release"
 	git push
+	rm -r $(PACKAGE)
+
 
