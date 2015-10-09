@@ -77,6 +77,6 @@ dist:
 	echo $(NRELEASE) > RELEASE
 	git commit -a -m "New release"
 	git push
-	rm -r $(PACKAGE)
+	rm -rf $(PACKAGE)
 
 
