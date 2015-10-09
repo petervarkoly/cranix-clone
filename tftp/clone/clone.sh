@@ -367,12 +367,14 @@ get_sysconfig()
 # get_ldap Partition Variable
 get_ldap()
 {
-    RES=$( ldapsearch -x -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue: PART_$1_$2=//" )
-    if [ "$RES" ]; then
-	echo $RES
-    else
-        ldapsearch -x -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue: PART_$1_$2=//"
+    RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue:" )
+    if [ -z "$RES" ]; then
+        RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue:" )
     fi
+    if [ $RES = ${RES/: /}]
+        return $RES
+    fi
+    echo ${RES/: /} | base64 -d
 }
 
 # Add the necessary configuration values to ldap
