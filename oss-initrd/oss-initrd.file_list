@@ -7,18 +7,21 @@ atftp:
     /usr/bin/atftp
 
 coreutils:
-    /usr/bin/cp
-    /usr/bin/df
-    /usr/bin/mkdir
-    /usr/bin/rm
+    /usr/bin/base64
     /usr/bin/basename
+    /usr/bin/cp
     /usr/bin/date
     /usr/bin/dd
+    /usr/bin/df
     /usr/bin/ls
-    /usr/bin/tr
+    /usr/bin/mkdir
+    /usr/bin/rm
     /usr/bin/touch
+    /usr/bin/tr
 
 dialog:
+    /etc/dialogrc
+    /usr/share/locale/de/LC_MESSAGES/dialog.mo
 
 dd_rescue:
 
@@ -34,15 +37,11 @@ gptfdisk:
 joe:
    /usr/bin/joe
 
-newt:
-
 ntfsprogs:
 
 openldap2-client:
 
 parted:
-
-partclone:
 
 partclone:
 

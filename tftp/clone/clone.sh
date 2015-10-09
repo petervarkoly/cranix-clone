@@ -50,7 +50,7 @@ backup_image()
 }
 #########################
 # The image save cmd
-# saveimage /dev/$PARTITON /mnt/itool [ partimage|dd|dd_rescue ] [ cleanup ]
+# saveimage /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
 ########################
 saveimage ()
 {
@@ -72,8 +72,12 @@ saveimage ()
 		TOOL=$3
 	fi
         case $TOOL in
+                partclone)
+			FSTYPE=$( grep $1 /tmp/prts.fs | gawk -F : '{ print $2 }' )
+			partclone.$FSTYPE -c -s $1 -O $2
+		;;
                 partimage)
-                        /usr/sbin/partimage -z1 -f3 -V0 -o -d --batch save $1 $2
+                        partimage -z1 -f3 -V0 -o -d --batch save $1 $2
                 ;;
                 dd)
 			echo "#################################################"
@@ -88,7 +92,7 @@ saveimage ()
 			echo "#    Das erstellen des Images wurde gestartet.  #"
 			echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 			echo "#################################################"
-                        /usr/bin/dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
+                        dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
 			sync
                 ;;
         esac
@@ -98,7 +102,7 @@ saveimage ()
 
 #########################
 # The image restore cmd
-# restore /dev/$PARTITON /mnt/itool [ partimage|dd|dd_rescue ] 
+# restore /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
 ########################
 restore ()
 {
@@ -109,11 +113,18 @@ restore ()
 		TOOL=$( cat $2.tool )
 	fi
         case $TOOL in
+                partclone)
+			if [ "$MULTICAST" ]; then
+				udp-receiver --nokbd 2> /dev/null | partclone.restore -O $1
+			else
+				partclone.restore -s $2 -O $1
+			fi
+		;;
                 partimage)
 			if [ "$MULTICAST" ]; then
-				udp-receiver --nokbd 2> /dev/null | gunzip | /usr/sbin/partimage -f3 --batch restore $1 stdin
+				udp-receiver --nokbd 2> /dev/null | gunzip | partimage -f3 --batch restore $1 stdin
 			else
-                        	/usr/sbin/partimage -f3 --batch restore $1 $2
+				partimage -f3 --batch restore $1 $2
 			fi
                 ;;
                 dd)
@@ -130,9 +141,9 @@ restore ()
                 ;;
                 dd_rescue)
 			if [ "$MULTICAST" ]; then
-                        	udp-receiver --nokbd 2> /dev/null | gunzip | /usr/bin/dd_rescue /dev/stdin $1
+				udp-receiver --nokbd 2> /dev/null | gunzip | /bin/dd_rescue /dev/stdin $1
 			else
-                        	cat $2 | gunzip | /usr/bin/dd_rescue /dev/stdin $1
+				cat $2 | gunzip | dd_rescue /dev/stdin $1
 			fi
                 ;;
         esac
@@ -231,7 +242,8 @@ man_part()
 	#Ask for backup mode
 	dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup der Partition $PARTITION nach $NAME" \
 		--nocancel --radiolist "Zu verwendende Imaging Tool waehlen!" 10 80 4 \
-		partimage "Partimage: für FAT, NTFS, Ext2, Ext3, ReiserFS" off \
+		partclone "Partclone: für fast alle Filesysteme" off \
+		partimage "Partimage: für ext2 ext3 und ntfs" off \
 		dd_rescue "Auch für fehlerhaften Partitionen geeignet" off \
 		dd	  "dd"        off \
 		2> /tmp/itool.input
@@ -484,7 +496,7 @@ get_info()
 	    ;;
 	    Data)
 		FORMAT=$( get_ldap $PARTITION FORMAT )
-		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; partimage="off"; dd="off"; dd_rescue="off"; no="off"; 
+		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; partclone="off"; partimage="off"; dd="off"; dd_rescue="off"; no="off"; 
 		case $FORMAT in
 		    msdos)	msdos="on";;
 		    vfat)	vfat="on";;
@@ -492,6 +504,7 @@ get_info()
 		    ext2)	ext2="on";;
 		    ext3)	ext3="on";;
 		    swap)	swap="on";;
+		    partclone)	partclone="on";;
 		    partimage)	partimage="on";;
 		    dd)		dd="on";;
 		    dd_rescue)	dd_rescue="on";;
@@ -506,6 +519,7 @@ get_info()
 			ext2  "Formatieren: Linux ext2"        $ext2 \
 			ext3  "Formatieren: Linux ext3"        $ext3 \
 			swap  "Formatieren: Linux swap"        $swap \
+			partclone "1 zu 1 Kopie mit Partclone" $partclone \
 			partimage "1 zu 1 Kopie mit Partimage" $partimage \
 			dd        "1 zu 1 Kopie mit dd"        $dd \
 			dd_rescue "1 zu 1 Kopie mit dd_rescue" $dd_rescue \
@@ -519,18 +533,20 @@ get_info()
 	    ;;
 	esac
 	#Which tool we want to use
-	partimage="off"; dd="off"; dd_rescue="off";
+	partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
 	TOOL=$( get_ldap $PARTITION ITOOL)
 	case $CTOOL in
+	    partclone)	partclone="on";;
 	    partimage)	partimage="on";;
 	    dd)		dd="on";;
 	    dd_rescue)	dd_rescue="on";;
 	    *)
-		partimage="on";;
+		partclone="on";;
 	esac
         dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
                 --title "\Zb\Z1Partition: $DESC" --nocancel \
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
+                partclone "Partclone"         $partclone \
                 partimage "Partimage"         $partimage \
                 dd    	  "dd 1 zu 1 Kopie"   $dd \
                 dd_rescue "dd_rescue"         $dd_rescue  2> /tmp/out
@@ -779,7 +795,7 @@ if [ -z "$SLEEP" ]; then
         SLEEP=1
 fi
 
-. /var/lib/dhcpcd/dhcpcd-$NIC.info
+. /tmp/dhcp.ini
 
 MAC=$( echo $DHCPCHADDR | gawk '{ print toupper($1) }' )
 MACN=$( echo $MAC | sed "s/:/-/g")
@@ -820,9 +836,13 @@ WORKGROUP=$( ldapsearch -x -LLL configurationkey=SCHOOL_WORKGROUP configurationV
 echo "WORKGROUP $WORKGROUP"
 
 # Activating DMA mode
+echo -n "" > /tmp/prts.fs
 for i in $HDs
 do
-	hdparm -d1 /dev/$i > /dev/null 2>&1
+   hdparm -d1 /dev/$i > /dev/null 2>&1
+   parted -m -s /dev/$i print > /tmp/prts
+   echo '/^[0-9]/ { printf("/dev/%s%i:%s\n","'$i'",$1,$5) }' > /tmp/prts.awk
+   gawk -F : -f /tmp/prts.awk /tmp/prts >> /tmp/prts.fs
 done
 echo "SLEEP $SLEEP"
 sleep $SLEEP

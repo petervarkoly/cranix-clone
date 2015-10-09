@@ -16,7 +16,7 @@ Moechten Sie es erneut versuchen?'
 ## Check for some boot parameter
 if [ -z "${ITOOL}" ]
 then
-        export ITOOL="partimage"
+        export ITOOL="partclone"
 fi
 ## Check for some boot parameter
 if [ -z "${STARTCMD}" ]
@@ -28,14 +28,38 @@ if [ -z "${SERVER}" ]
 then
         export SERVER="install"
 fi
+
 ## if no nic was defined set it to eth0
 if [ -z "${NIC}" ]
 then
-        NIC=$( ls /var/lib/dhcpcd/dhcpcd-*info )
-	export NIC=$( echo $NIC | sed -r 's/.*dhcpcd-(.*).info/\1/' )
+        for i in $( hwinfo --netcard | grep "Device File:"  | gawk -F": " '{ print $2 }' )
+        do
+                /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $i
+                if [ -e /tmp/dhcp.ini ]
+                then
+                        export NIC=$i
+                        break
+                fi
+        done
+else
+        /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $NIC
 fi
 
-. /var/lib/dhcpcd/dhcpcd-${NIC}.info
+. /tmp/dhcp.ini
+IPADDR=${IPADDR/\/*/}
+
+if [ -z "${HOSTNAME}" ]
+then
+        export HOSTNAME=`ldapsearch -x -h ldap -LLL aRecord=$IPADDR relativeDomainName | grep -i relativeDomainName: | sed 's/relativeDomainName: //i'`
+        echo "HOSTNAME='${HOSTNAME}'" >> /tmp/dhcp.ini
+fi
+
+if [ -z "${DHCPCHADDR}" ]
+then
+        DHCPCHADDR=$( cat /sys/class/net/${NIC}/address )
+        echo "DHCPCHADDR='${DHCPCHADDR}'" >> /tmp/dhcp.ini
+fi
+
 if [ -z "${SLEEP}" ]
 then
         export SLEEP=1
@@ -120,3 +144,5 @@ else
         fi
     done
 fi
+
+exit
