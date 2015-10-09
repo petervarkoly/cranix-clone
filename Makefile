@@ -51,10 +51,10 @@ install:
 
 oss-initrd:
 	cd oss-initrd; tar cjf ../oss-initrd.tar.bz2 *;
-	if [ -d /data1/OSC/home\:openschoolserver/installation-images ] ; then \
-		cd /data1/OSC/home\:openschoolserver/installation-images; osc up; cd $(HERE); \
-		cp oss-initrd.tar.bz2 /data1/OSC/home\:openschoolserver/installation-images; \
-		cd /data1/OSC/home\:openschoolserver/installation-images; \
+	if [ -d /data1/OSC/home\:openschoolserver/installation-images-openSUSE ] ; then \
+		cd /data1/OSC/home\:openschoolserver/installation-images-openSUSE; osc up; cd $(HERE); \
+		cp oss-initrd.tar.bz2 /data1/OSC/home\:openschoolserver/installation-images-openSUSE; \
+		cd /data1/OSC/home\:openschoolserver/installation-images-openSUSE; \
 		osc vc; \
                 osc ci -m "New Build Version"; \
         fi
