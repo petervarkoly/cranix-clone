@@ -812,7 +812,7 @@ HWDN=`ldapsearch -x -LLL configurationKey=$HW dn | sed 's/dn: //'| sed '/^$/d' |
 echo "HWDN $HWDN"
 
 ## Get the list of the harddisks
-HDs=`sfdisk -s | gawk -F: ' /dev/ { print $1 }' | sed 's#/dev/##g'` 
+HDs=`sfdisk -s | grep -v loop | gawk -F: ' /dev/ { print $1 }' | sed 's#/dev/##g'` 
 echo "HDs $HDs"
 
 ## Get the WORKGROUP

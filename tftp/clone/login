@@ -46,17 +46,18 @@ export HOSTNAME=${HOSTNAME%%.*}
 
 if [ "$MODUS" = "AUTO" ]
 then
+    echo "username=register" >  /tmp/credentials
+    echo "password=register" >> /tmp/credentials 
+    echo "register" > /tmp/username
+    echo "register" > /tmp/userpassword
+    chmod 400 /tmp/userpassword
+    chmod 400 /tmp/credentials
     echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
-    mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool
+    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
     sleep $SLEEP
-    if [ -d /mnt/itool/ROOT ]
+    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     then
-	if [ -z "$NOCOPY" ]
-	then	
-            cp -a /mnt/itool/ROOT/* /
-	fi
-	sleep $SLEEP
-        . /root/${STARTCMD}.sh
+        bash ${CDEBUG} /root/${STARTCMD}.sh
         exit 0
     else
     	dialog  --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
@@ -96,20 +97,13 @@ else
 	    echo -n "username=" > /tmp/credentials; cat /tmp/username >> /tmp/credentials;
 	    echo >> /tmp/credentials;
 	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
-	    chmod 600 /tmp/credentials
+	    chmod 400 /tmp/credentials
+	    chmod 400 /tmp/userpassword
     	    
     	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
     	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     	    then
-    		if [ -d /mnt/itool/ROOT ]
-    		then
-		    if [ -z "$NOCOPY" ]
-		    then	
-		        cp -a /mnt/itool/ROOT/* /
-		    fi
-    		fi
-		sleep $SLEEP
-    		. /root/${STARTCMD}.sh
+    		/bin/bash ${CDEBUG} /root/${STARTCMD}.sh
     		exit 0
     	    else
     		umount /mnt/itool
