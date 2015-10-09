@@ -7,9 +7,9 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="3.4.2"
+                                IVERSION="3.5"
 
-                                IBUILD="27.07.2014"
+                                IBUILD="09.10.2015"
 #
 ###############################################################################
 
@@ -429,10 +429,9 @@ get_info()
         DESC=`gawk "NR==$i { print }" /tmp/descriptions`
 	add_ldap $PARTITION DESC "$DESC"
 	OS=$( get_ldap $PARTITION OS )
-	Win2K="off"; WinXP="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
+	Win10="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
 	case $OS in
-	    Win2K) Win2K="on";;
-	    WinXP) WinXP="on";;
+	    Win10) Win10="on";;
 	    Win7)  Win7="on";;
 	    Win8)  Win8="on";;
 	    Linux) Linux="on";;
@@ -442,8 +441,7 @@ get_info()
         dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 		--title "\Zb\Z1Partition: $DESC" --nocancel \
 		--radiolist "Waehlen Sie das Betriebsystem:" 18 60 8 \
-		Win2K    "Windows 2000"         $Win2K \
-		WinXP    "Windows XP"           $WinXP \
+		Win10    "Windows 10"           $Win10 \
 		Win7     "Windows 7"            $Win7 \
 		Win8     "Windows 8"            $Win8 \
 		Linux    "Linux"                $Linux \
