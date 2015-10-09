@@ -21,6 +21,7 @@ coreutils:
 
 dialog:
     /etc/dialogrc
+    /usr/bin/dialog
     /usr/share/locale/de/LC_MESSAGES/dialog.mo
 
 dd_rescue:
