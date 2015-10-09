@@ -45,4 +45,4 @@ atftp -g -r clone/clone.sh -l cloneTool ${SERVER}
 if [ -s cloneTool ]; then
 	mv cloneTool /root/clone.sh
 fi
-/bin/bash -l /root/login
+/bin/bash ${CDEBUG} -l /root/login
