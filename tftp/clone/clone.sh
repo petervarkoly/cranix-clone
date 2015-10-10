@@ -371,11 +371,11 @@ get_ldap()
     if [ -z "$RES" ]; then
         RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
     fi
-    if [ $RES = ${RES/: /} ]; then
-        echo ${RES/ PART_$1_$2=/}
+    if [ "$RES" = "${RES/: /}" ]; then
+        echo "${RES/ PART_$1_$2=/}"
         return
     fi
-    echo ${RES/: /} | base64 -d | sed "s/PART_$1_$2=//"
+    echo "${RES/: /}" | base64 -d | sed "s/PART_$1_$2=//"
 }
 
 # Add the necessary configuration values to ldap
@@ -432,8 +432,9 @@ get_info()
         DESC=`gawk "NR==$i { print }" /tmp/descriptions`
 	add_ldap $PARTITION DESC "$DESC"
 	OS=$( get_ldap $PARTITION OS )
-	Win10="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
+	WinBoot="off"; Win10="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
 	case $OS in
+	    WinBoot) WinBoot="on";;
 	    Win10) Win10="on";;
 	    Win7)  Win7="on";;
 	    Win8)  Win8="on";;
@@ -446,6 +447,7 @@ get_info()
 		--radiolist "Waehlen Sie das Betriebsystem:" 18 60 8 \
 		Win10    "Windows 10"           $Win10 \
 		Win7     "Windows 7"            $Win7 \
+		WinBoot  "Windows Bootpartition" $WinBoot \
 		Win8     "Windows 8"            $Win8 \
 		Linux    "Linux"                $Linux \
 		Data     "Partition fuer Daten" $Data 2> /tmp/out
@@ -454,6 +456,12 @@ get_info()
         sleep $SLEEP
 	
 	case $OS in
+	    WinBoot)
+	        add_ldap $PARTITION JOIN "no"
+		if [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
+			backup_image /mnt/itool/images/$HW/$PARTITION.img
+		fi
+	    ;;
 	    Win*)
 		JOIN=$( get_ldap $PARTITION JOIN )
 		Simple="off"; Domain="off"; Workgroup="off"; No="off";
@@ -463,21 +471,12 @@ get_info()
 		    Workgroup)  Workgroup="on";;
 		    no)         No="on";;
 		esac
-		if [ "$OS" = "Win7" -o "$OS" = "Win8" ]; then
-			dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-				--title "\Zb\Z1Partition: $DESC" --nocancel \
-				--radiolist "Windows Anmeldung:" 11 60 4 \
-				Simple    "Windows Domainenmitglied ohne Sysprep"  $Simple \
-				Domain    "Windows Domainenmitglied"               $Domain \
-				no	  "Keine Aufnahme"                         $No 2> /tmp/out
-		else
-			dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-				--title "\Zb\Z1Partition: $DESC" --nocancel \
-				--radiolist "Windows Anmeldung:" 11 60 4 \
-				Domain    "Windows Domainenmitglied"               $Domain \
-				Workgroup "Windows Workgroupmitglied"              $Workgroup \
-				no	  "Keine Aufnahme"                         $No 2> /tmp/out
-		fi
+		dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+			--title "\Zb\Z1Partition: $DESC" --nocancel \
+			--radiolist "Windows Anmeldung:" 11 60 4 \
+			Simple    "Windows Domainenmitglied ohne Sysprep"  $Simple \
+			Domain    "Windows Domainenmitglied"               $Domain \
+			no	  "Keine Aufnahme"                         $No 2> /tmp/out
 	        JOIN=`cat /tmp/out`
 	        add_ldap $PARTITION JOIN $JOIN
 		sleep $SLEEP
@@ -497,7 +496,7 @@ get_info()
 	    ;;
 	    Data)
 		FORMAT=$( get_ldap $PARTITION FORMAT )
-		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; partclone="off"; partimage="off"; dd="off"; dd_rescue="off"; no="off"; 
+		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; clone="off"; no="off"; 
 		case $FORMAT in
 		    msdos)	msdos="on";;
 		    vfat)	vfat="on";;
@@ -505,10 +504,7 @@ get_info()
 		    ext2)	ext2="on";;
 		    ext3)	ext3="on";;
 		    swap)	swap="on";;
-		    partclone)	partclone="on";;
-		    partimage)	partimage="on";;
-		    dd)		dd="on";;
-		    dd_rescue)	dd_rescue="on";;
+		    clone)	clone="on";;
 		    no)         no="on";;
 		esac
 	        dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
@@ -520,14 +516,11 @@ get_info()
 			ext2  "Formatieren: Linux ext2"        $ext2 \
 			ext3  "Formatieren: Linux ext3"        $ext3 \
 			swap  "Formatieren: Linux swap"        $swap \
-			partclone "1 zu 1 Kopie mit Partclone" $partclone \
-			partimage "1 zu 1 Kopie mit Partimage" $partimage \
-			dd        "1 zu 1 Kopie mit dd"        $dd \
-			dd_rescue "1 zu 1 Kopie mit dd_rescue" $dd_rescue \
-			no        "Nicht formatieren" $no 2> /tmp/out
+			clone "1 zu 1 Kopie"                   $clone \
+			no    "Nicht formatieren" $no 2> /tmp/out
 	        FORMAT=`cat /tmp/out`
 	        add_ldap $PARTITION FORMAT $FORMAT
-		if [ FORMAT = "dd" -a  -e /mnt/itool/images/$HW/$PARTITION.img ]; then
+		if [ FORMAT = "clone" -a  -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 			backup_image /mnt/itool/images/$HW/$PARTITION.img
 		fi
 	        sleep $SLEEP
@@ -536,7 +529,7 @@ get_info()
 	#Which tool we want to use
 	partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
 	TOOL=$( get_ldap $PARTITION ITOOL)
-	case $CTOOL in
+	case $TOOL in
 	    partclone)	partclone="on";;
 	    partimage)	partimage="on";;
 	    dd)		dd="on";;
@@ -595,11 +588,12 @@ clone()
 	JOIN=$( get_ldap $PARTITION JOIN)
 	if [ "$OS" = "Data" ]; then
 	    FORMAT=$( get_ldap $PARTITION FORMAT)
-	    if [ $FORMAT = 'dd' ]; then
-            	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img dd_rescue
+	    if [ $FORMAT = 'clone' ]; then
+	        CTOOL=$( get_ldap $PARTITION ITOOL)
+            	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-	    if [ "$OS" = "Win7" -o "$OS" = "Win8" -a "$JOIN" != "no" ]; then
+	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
 	    	mkdir /mnt/$PARTITION
 		mount /dev/$PARTITION /mnt/$PARTITION
 		if [ -e /mnt/$PARTITION/script/ ]
@@ -697,44 +691,24 @@ make_autoconfig()
 		    continue
 		fi
 	        ProductID=$( get_ldap $PARTITION ProductID)
-		if [ $OS = "Win7" -o $OS = "Win8" ]; then
-			if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
-			    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
-			    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
-			    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-			    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-			    #cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Unattend.xml
-			    #sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Unattend.xml
-			    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
-			    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
-			fi
-			if [ ${JOIN} = "Domain" ]; then
-				cp /mnt/itool/config/${OS}DomainJoin.bat /mnt/$PARTITION/script/domainjoin.bat
-			fi
-			sed -i s/HOSTNAME/${HOSTNAME}/   /mnt/$PARTITION/script/domainjoin.bat
-			sed -i s/WORKGROUP/${WORKGROUP}/ /mnt/$PARTITION/script/domainjoin.bat
-			if [ ${JOIN} = "Simple" ]; then
-				if [ "$MASTER" ]; then
-					touch /mnt/$PARTITION/script/renamed
-				fi
-			fi
-		else
-			SYSPREP=$( ls /mnt/$PARTITION/ | grep -i sysprep )
-			if [ -z $SYSPREP ]; then
-			    SYSPREP="SYSPREP"
-			fi
-			mkdir -p /mnt/$PARTITION/$SYSPREP/i386/\$oem\$/
-			for i in /mnt/itool/images/$HW/$PARTITION-Unattended/*
-			do
-			    test -e $i || continue
-			    echo ${OS} ${JOIN}
-			    cp -p $i /mnt/$PARTITION/$SYSPREP/i386/\$oem\$/
-			done
-			if [ -e /mnt/itool/config/${OS}${JOIN}.inf ]; then
-			    cp /mnt/itool/config/${OS}${JOIN}.inf /mnt/$PARTITION/$SYSPREP/Sysprep.inf
-			    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/$SYSPREP/Sysprep.inf
-			    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/$SYSPREP/Sysprep.inf
-			    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/$SYSPREP/Sysprep.inf
+		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
+		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    #cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Unattend.xml
+		    #sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Unattend.xml
+		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
+		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
+		fi
+		if [ ${JOIN} = "Domain" ]; then
+			cp /mnt/itool/config/${OS}DomainJoin.bat /mnt/$PARTITION/script/domainjoin.bat
+		fi
+		sed -i s/HOSTNAME/${HOSTNAME}/   /mnt/$PARTITION/script/domainjoin.bat
+		sed -i s/WORKGROUP/${WORKGROUP}/ /mnt/$PARTITION/script/domainjoin.bat
+		if [ ${JOIN} = "Simple" ]; then
+			if [ "$MASTER" ]; then
+				touch /mnt/$PARTITION/script/renamed
 			fi
 		fi
 	    ;;
@@ -766,8 +740,8 @@ restore_partitions()
 			swap)
 				/sbin/mkswap /dev/$PARTITION
 			;;
-			dd)
-				restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img dd_rescue
+			clone)
+				restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img
 			;;
 		esac
 	elif [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
