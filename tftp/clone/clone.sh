@@ -367,14 +367,15 @@ get_sysconfig()
 # get_ldap Partition Variable
 get_ldap()
 {
-    RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue:" )
+    RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
     if [ -z "$RES" ]; then
-        RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue:" )
+        RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
     fi
-    if [ $RES = ${RES/: /}]
-        return $RES
+    if [ $RES = ${RES/: /} ]; then
+        echo ${RES/ PART_$1_$2=/}
+        return
     fi
-    echo ${RES/: /} | base64 -d
+    echo ${RES/: /} | base64 -d | sed "s/PART_$1_$2=//"
 }
 
 # Add the necessary configuration values to ldap
@@ -383,7 +384,7 @@ add_ldap()
 {
     echo "dn: $HWDN" > /tmp/ldap_modify
     IFS=$'\n'
-    echo $( get_ldap $1 $2 )
+    OLD=$( get_ldap $1 $2 )
     for OLD in $( get_ldap $1 $2 )
     do 
         echo "delete: configurationValue"          >> /tmp/ldap_modify
