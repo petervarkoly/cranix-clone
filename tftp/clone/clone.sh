@@ -256,7 +256,7 @@ man_part()
 		2> /tmp/itool.input
 	MBR=$(cat /tmp/itool.input)
 	if [ $MBR = "yes" ]; then
-		dd of=/mnt/itool/images/manual/$NAME.parting if=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+		dd of=/mnt/itool/images/manual/$NAME.parting if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 	fi
         saveimage $PARTITION  /mnt/itool/images/manual/$NAME.img $TOOL
         chmod 775 /mnt/itool/images/manual/$NAME.img
@@ -294,7 +294,7 @@ man_part()
 			2> /tmp/itool.input
 		MBR=$(cat /tmp/itool.input)
 		if [ $MBR = "yes" ]; then
-			dd if=/mnt/itool/images/manual/$NAME.parting of=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+			dd if=/mnt/itool/images/manual/$NAME.parting of=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 		fi
 	fi 
         dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup einer Partition" \
@@ -313,7 +313,9 @@ select_partitions()
     [ -e /tmp/partitions ] && rm -f /tmp/partitions
     for i in $HDs
     do
-       parted -m -s /dev/$i print >> /tmp/disklist
+       parted -m -s /dev/$i print > /tmp/disklist
+       sed -i /type=05/d    /tmp/disklist
+       sed -i /linux-swap/d /tmp/disklist
        echo '/^[0-9]/ { printf("%s%i:%s\t%s\t%s\n","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
        gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/parts
     done 
@@ -569,7 +571,7 @@ clone()
 
     for HD in $HDs 
     do
-        dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+        dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 	PTTYPE=$(  parted -m -s /dev/$HD print | gawk -F : 'NR==2 { print  $6 }' )
 	case $PTTYPE in
 	    gpt)
@@ -628,7 +630,7 @@ mbr()
 {
     for HD in $HDs 
     do
-        dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=62 bs=512 > /dev/null 2>&1
+        dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
     done
 }
 
@@ -636,8 +638,8 @@ initialize_disks()
 {
     for HD in $HDs 
     do
-        echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=62 bs=512"
-        dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=62 bs=512
+        echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512"
+        dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512
 	sleep 5
 	if [ -e /mnt/itool/images/$HW/$HD.sfdisk ]
 	then
