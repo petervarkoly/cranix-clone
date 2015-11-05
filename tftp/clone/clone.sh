@@ -483,15 +483,15 @@ get_info()
 	        add_ldap $PARTITION JOIN $JOIN
 		sleep $SLEEP
 
-		if [ "$JOIN" = "Domain" ]; then 
-			ProductID=$( get_ldap $PARTITION ProductID )
-			dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-				--title "\Zb\Z1Partition: $DESC" --nocancel \
-				--inputbox "Geben Sie die Product-ID (Windows-Seriennummer) ein" 10 60 "$ProductID" 2> /tmp/out
-			ProductID=`cat /tmp/out`
-			add_ldap $PARTITION ProductID $ProductID
-			sleep $SLEEP
-		fi
+#		if [ "$JOIN" = "Domain" ]; then 
+#			ProductID=$( get_ldap $PARTITION ProductID )
+#			dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+#				--title "\Zb\Z1Partition: $DESC" --nocancel \
+#				--inputbox "Geben Sie die Product-ID (Windows-Seriennummer) ein" 10 60 "$ProductID" 2> /tmp/out
+#			ProductID=`cat /tmp/out`
+#			add_ldap $PARTITION ProductID $ProductID
+#			sleep $SLEEP
+#		fi
 		if [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 			backup_image /mnt/itool/images/$HW/$PARTITION.img
 		fi
@@ -603,8 +603,12 @@ clone()
 			rm -r /mnt/$PARTITION/script/
 		fi
 		mkdir /mnt/$PARTITION/script/
-		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
-		sed -i s/OLDNAME/${HOSTNAME}/ /mnt/$PARTITION/script/domainjoin.bat
+#		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
+#		sed -i s/OLDNAME/${HOSTNAME}/ /mnt/$PARTITION/script/domainjoin.bat
+		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
+		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
+		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
 		umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_ldap $PARTITION ITOOL)
@@ -696,23 +700,17 @@ make_autoconfig()
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+#		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    #cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Unattend.xml
 		    #sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Unattend.xml
 		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
 		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
 		fi
-		if [ ${JOIN} = "Domain" ]; then
-			cp /mnt/itool/config/${OS}DomainJoin.bat /mnt/$PARTITION/script/domainjoin.bat
-		fi
-		sed -i s/HOSTNAME/${HOSTNAME}/   /mnt/$PARTITION/script/domainjoin.bat
-		sed -i s/WORKGROUP/${WORKGROUP}/ /mnt/$PARTITION/script/domainjoin.bat
-		if [ ${JOIN} = "Simple" ]; then
-			if [ "$MASTER" ]; then
-				touch /mnt/$PARTITION/script/renamed
-			fi
-		fi
+		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
+		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
+		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
