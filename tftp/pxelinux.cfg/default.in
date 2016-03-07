@@ -14,7 +14,7 @@ LABEL Festplatte
 
 LABEL CloneTool
         kernel clone/linux
-        append initrd=clone/initrd install=exec:/bin/start_itool MemLimit=10 MemYASTText=10 Info=tftp://install/linuxrc.config ITOOL=partimage STARTCMD=clone SLEEP=1 apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe
+        append initrd=clone/initrd install=exec:/bin/start_itool MemLimit=10 MemYASTText=10 Info=tftp://install/linuxrc.config ITOOL=partclone STARTCMD=clone SLEEP=1 apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe
 
 
 #LABEL KiwiCloneTool
