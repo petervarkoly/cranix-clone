@@ -70,7 +70,34 @@ exit 0
 %files
 %defattr(-,root,root)
 %config /etc/xinetd.d/*
-/srv/*
+%config(noreplace) /srv/tftp/clouds.jpg
+%dir /srv/tftp
+/srv/tftp/bootlogo
+/srv/tftp/menu.c32
+/srv/tftp/boot
+/srv/tftp/boot/initrd
+/srv/tftp/boot/linux
+/srv/tftp/pxelinux.0
+/srv/tftp/gfxboot.c32
+/srv/tftp/chain.c32
+/srv/tftp/elilo.conf
+/srv/tftp/german.kbd
+/srv/tftp/clone
+/srv/tftp/clone/partitions.ids
+/srv/tftp/clone/clone.sh
+/srv/tftp/clone/initrd
+/srv/tftp/clone/initrd64
+/srv/tftp/clone/login
+/srv/tftp/clone/linux
+/srv/tftp/clone/linux64
+/srv/tftp/linuxrc.config_DEFAULT
+/srv/tftp/font.fnt
+/srv/tftp/pxelinux.cfg
+/srv/tftp/pxelinux.cfg/default.in
+/srv/tftp/linuxrc.config_DE
+/srv/tftp/bootmenu
+/srv/tftp/elilo.efi
+/srv/itool
 /usr/share/oss/templates/*.in
 %defattr(-,root,root)
 /usr/sbin/*
