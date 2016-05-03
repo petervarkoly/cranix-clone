@@ -1,5 +1,5 @@
-$newName  = "HOSTNAME".ToLower() # edv-pc00
-$domain   = "WORKGROUP".ToLower() # School Domain
+$newName  = "HOSTNAME".ToLower()  # HOST_NAME  --> edv-pc00
+$domain   = "WORKGROUP".ToLower() # WORK_GROUP --> DomainName
 $user     = "register"
 $username = "$domain\$user" 
 $currentName     = $(Get-WmiObject Win32_Computersystem).name.ToLower()
@@ -36,22 +36,26 @@ function My-Rename-Computer
             $result = $computer.Rename($name)
             switch($result.ReturnValue)
             {       
-                0 { Write-Output "Success rename workstation!" | Out-File $logFile -Append }
+                0
+                {
+                    return $true
+                }
                 5 
                 {
                     Write-Output "You need administrative rights to execute this cmdlet" | Out-File $logFile -Append
-                    exit
+                    return $false
                 }
                 default 
                 {
                     Write-Output "Error - return value of " $result.ReturnValue | Out-File $logFile -Append
-                    exit
+                    return $false
                 }
             }
         }
         catch
         {
             Write-Output "Exception occurred in My-Rename-Computer " $Error | Out-File $logFile -Append
+            return $false
         }
     }
 }
@@ -82,8 +86,18 @@ if( ("$winVersionMajor.$winVersionMinor" -eq "10.0") -or
         Write-Output "Rename Workstation!" | Out-File $logFile -Append
         Rename-Computer -NewName $newName -Force -Restart
     }elseif( ($currentName -eq $newName) -and ($currentDomain -ne  $domain) -and ((gwmi win32_computersystem).partofdomain -ne $true) ){
-        Write-Output "Add workstation to school domain!" | Out-File $logFile -Append
-        Add-Computer -DomainName $domain -Credential $credential -Force -Restart
+        $objReturn = Add-Computer -DomainName $domain -Credential $credential -PassThru
+        Write-Output "objReturn:" $objReturn.hasSucceeded | Out-File $logFile -Append
+        if( $objReturn.hasSucceeded )
+        {
+            Write-Output "Successfully added workstation to domain!" | Out-File $logFile -Append
+            Start-Sleep -Seconds 5
+            Restart-Computer -Force
+        }else{
+            Write-Output "Unsuccessfully added workstation to domain!" | Out-File $logFile -Append
+        }
+#        Write-Output "Add workstation to domain!" | Out-File $logFile -Append
+#        Add-Computer -DomainName $domain -Credential $credential -Force -Restart
     }elseif( ($currentName -eq $newName) -and ($currentDomain -eq  $domain) -and ((gwmi win32_computersystem).partofdomain -eq $true) ){
         Write-Output "Workstation is domain joined!" | Out-File $logFile -Append
         if( Test-Path $scriptsDir ){
@@ -105,19 +119,40 @@ elseif( ("$winVersionMajor.$winVersionMinor" -eq "6.1") -or
     }    
     if( ($currentName -ne $newName) -and ($currentDomain -eq  $domain) ){
         Write-Output "Add workstation to workgroup!" | Out-File $logFile -Append
-        Remove-Computer -Credential $credential -Force
-        Start-Sleep -Seconds 5
-        Restart-Computer -Force
+        $objReturn = Add-Computer -workgroupname "workgroup" -PassThru
+        Write-Output "objReturn:" $objReturn | Out-File $logFile -Append
+        if( $objReturn -Or $objReturn.hasSucceeded )
+        {
+            Write-Output "Successfully added workstation to workgroup!" | Out-File $logFile -Append
+            Start-Sleep -Seconds 5
+            Restart-Computer -Force
+        }else{
+            Write-Output "Unsuccessfully added workstation to workgroup!" | Out-File $logFile -Append
+        }
     }elseif( $currentName -ne $newName ){
         Write-Output "Rename Workstation!" | Out-File $logFile -Append
-        My-Rename-Computer $newName
-        Start-Sleep -Seconds 5
-        Restart-Computer -Force
+        $objReturn = My-Rename-Computer $newName
+        Write-Output "objReturn:" $objReturn | Out-File $logFile -Append
+        if( $objReturn )
+        {
+            Write-Output "Successfully renamed workstation!" | Out-File $logFile -Append
+            Start-Sleep -Seconds 5
+            Restart-Computer -Force
+        }else{
+            Write-Output "Unsuccessfully renamed workstation!" | Out-File $logFile -Append
+        }
     }elseif( ($currentName -eq $newName) -and ($currentDomain -ne  $domain) -and ((gwmi win32_computersystem).partofdomain -ne $true) ){
-        Write-Output "Add workstation to school domain!" | Out-File $logFile -Append
-        Add-Computer -DomainName $domain -Credential $credential
-        Start-Sleep -Seconds 5
-        Restart-Computer -Force
+        Write-Output "Add workstation to domain!" | Out-File $logFile -Append
+        $objReturn = Add-Computer -DomainName $domain -Credential $credential -PassThru
+        Write-Output "objReturn:" $objReturn.hasSucceeded | Out-File $logFile -Append
+        if( $objReturn.hasSucceeded )
+        {
+            Write-Output "Successfully added workstation to domain!" | Out-File $logFile -Append
+            Start-Sleep -Seconds 5
+            Restart-Computer -Force
+        }else{
+            Write-Output "Unsuccessfully added workstation to domain!" | Out-File $logFile -Append
+        }
     }elseif( ($currentName -eq $newName) -and ($currentDomain -eq  $domain) -and ((gwmi win32_computersystem).partofdomain -eq $true) ){
         Write-Output "Workstation is domain joined!" | Out-File $logFile -Append
         if( Test-Path $scriptsDir ){
