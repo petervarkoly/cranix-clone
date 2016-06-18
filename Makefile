@@ -44,6 +44,7 @@ install:
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*bat             $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*ps1             $(DESTDIR)/srv/itool/config
+	install -m 644 $(INSTUSER) config/*sh              $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	
 	#configure some executables
