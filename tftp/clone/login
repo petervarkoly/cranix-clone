@@ -48,11 +48,8 @@ fi
 . /tmp/dhcp.ini
 IPADDR=${IPADDR/\/*/}
 
-if [ -z "${HOSTNAME}" ]
-then
-        export HOSTNAME=`ldapsearch -x -h ldap -LLL aRecord=$IPADDR relativeDomainName | grep -i relativeDomainName: | sed 's/relativeDomainName: //i'`
-        echo "HOSTNAME='${HOSTNAME}'" >> /tmp/dhcp.ini
-fi
+export HOSTNAME=`ldapsearch -x -h ldap -LLL aRecord=$IPADDR relativeDomainName | grep -i relativeDomainName: | sed 's/relativeDomainName: //i'`
+echo "HOSTNAME='${HOSTNAME}'" >> /tmp/dhcp.ini
 
 if [ -z "${DHCPCHADDR}" ]
 then
@@ -65,8 +62,9 @@ then
         export SLEEP=1
 fi
 
-
 export HOSTNAME=${HOSTNAME%%.*}
+
+loadkeys de-latin1
 
 if [ "$MODUS" = "AUTO" ]
 then
