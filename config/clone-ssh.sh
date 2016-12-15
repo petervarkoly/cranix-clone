@@ -748,12 +748,12 @@ clone()
             	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
+#	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
+	    if [ "${OS:0:3}" = "Win" ]; then
 	    	mkdir /mnt/$PARTITION
 		mount /dev/$PARTITION /mnt/$PARTITION
-		if [ -e /mnt/$PARTITION/script/ ]
-		then
-			rm -r /mnt/$PARTITION/script/
+		if [ -e /mnt/$PARTITION/script/ ]; then
+		    rm -r /mnt/$PARTITION/script/
 		fi
 		mkdir /mnt/$PARTITION/script/
 #		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
@@ -762,6 +762,9 @@ clone()
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+		if [ "$JOIN" = "no" ]; then
+		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+		fi
 		umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_ldap $PARTITION ITOOL)
@@ -846,10 +849,10 @@ make_autoconfig()
 		fi
 	        # If we do not have to join the domain do nothing else until the post script
 		JOIN=$( get_ldap $PARTITION JOIN)
-		if [ "$JOIN" = "no" ]; then
-		    continue
-		fi
-	        ProductID=$( get_ldap $PARTITION ProductID)
+#		if [ "$JOIN" = "no" ]; then
+#		    continue
+#		fi
+#	        ProductID=$( get_ldap $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
@@ -860,10 +863,17 @@ make_autoconfig()
 		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
 		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
 		fi
+		if [ -e /mnt/$PARTITION/script/ ]; then 
+		    rm -r /mnt/$PARTITION/script/
+		fi
+		mkdir /mnt/$PARTITION/script/
 		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+		if [ "$JOIN" = "no" ]; then
+		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+		fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
