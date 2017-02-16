@@ -50,7 +50,7 @@ backup_image()
 }
 #########################
 # The image save cmd
-# saveimage /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
+# saveimage $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
 ########################
 saveimage ()
 {
@@ -73,11 +73,11 @@ saveimage ()
 	fi
         case $TOOL in
                 partclone)
-			FSTYPE=$( grep $1 /tmp/prts.fs | gawk -F : '{ print $2 }' )
-			partclone.$FSTYPE -c -s $1 -O $2
+			FSTYPE=$( cat /tmp/parts/$1/fs )
+			partclone.$FSTYPE -c -s /dev/$1 -O $2
 		;;
                 partimage)
-                        partimage -z1 -f3 -V0 -o -d --batch save $1 $2
+                        partimage -z1 -f3 -V0 -o -d --batch save /dev/$1 $2
                 ;;
                 dd)
 			echo "#################################################"
@@ -92,7 +92,7 @@ saveimage ()
 			echo "#    Das erstellen des Images wurde gestartet.  #"
 			echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 			echo "#################################################"
-                        dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
+                        dd_rescue -y 0 -f -a /dev/$1 /dev/stdout | gzip > $2
 			sync
                 ;;
         esac
@@ -102,7 +102,7 @@ saveimage ()
 
 #########################
 # The image restore cmd
-# restore /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
+# restore $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
 ########################
 restore ()
 {
@@ -160,7 +160,7 @@ cls ()
 
 restart()
 {
-	umount /mnt/itool
+	#umount /mnt/itool
 	sleep 2
 	exit 0
 }
@@ -202,11 +202,14 @@ man_part()
 {
    [ -e /tmp/disklist ]   && rm -f /tmp/disklist
    [ -e /tmp/partitions ] && rm -f /tmp/partitions
-   for i in $HDs
+   for i in $( ls -d /tmp/parts/* )
    do
-      parted -m -s /dev/$i print >> /tmp/disklist
-      echo '/^[0-9]/ { printf("\"%s%i\" \"%s\t%s\t%s\" ","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
-      gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/partitions
+      fs=$( cat $i/fs )
+      if [ -z "$fs" -o "${fs/linux-swap}" != "$fs" ]; then
+         continue
+      fi
+      p=$( basename $i )
+      echo -n "$p '$(cat $i/desc) $(cat $i/size) $(cat $i/fs)' " >> /tmp/partitions
    done
    echo -n 'dialog --colors --backtitle "CloneTool - '${IVERSION}'" --title "Manuelles Backup/Restore einer Partition" --menu  "Zur Verfuegung stehende Partitionen:" 20 50 8 ' > /tmp/command
    cat /tmp/partitions >> /tmp/command
@@ -258,7 +261,7 @@ man_part()
 	if [ $MBR = "yes" ]; then
 		dd of=/mnt/itool/images/manual/$NAME.parting if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 	fi
-        saveimage $PARTITION  /mnt/itool/images/manual/$NAME.img $TOOL
+        saveimage $( baseaname $PARTITION ) /mnt/itool/images/manual/$NAME.img $TOOL
         chmod 775 /mnt/itool/images/manual/$NAME.img
         sleep $SLEEP
    else
@@ -309,28 +312,20 @@ select_partitions()
     # checklist dialog to select the partitions to clone or to restore.
     # This will be saved into the file /tmp/partitions
     [ -e /tmp/disklist ]   && rm -f /tmp/disklist
-    [ -e /tmp/parts  ]     && rm -f /tmp/parts
     [ -e /tmp/partitions ] && rm -f /tmp/partitions
-    for i in $HDs
+    for i in $( ls -d /tmp/parts/* )
     do
-       parted -m -s /dev/$i print > /tmp/disklist
-       sed -i /type=05/d    /tmp/disklist
-       sed -i /linux-swap/d /tmp/disklist
-       echo '/^[0-9]/ { printf("%s%i:%s\t%s\t%s\n","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
-       gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/parts
-    done 
-    IFS=$'\n'
-    for i in `cat /tmp/parts`
-    do
-        part=$( echo "$i" | gawk -F : '{ print $1 }' )
-	desc=$( get_ldap $part DESC )
-	if [ "$desc" ]; then
-	    echo -n "$part \"$desc\" on " >> /tmp/partitions
-	else
-    	    echo $i | gawk -F : '{ printf("%s \"%s\" on ",$1,$2) }' >> /tmp/partitions
-	fi
+       fs=$( cat $i/fs )
+       if [ -z "$fs" -o "${fs/linux-swap}" != "$fs" ]; then
+          continue
+       fi
+       p=$( basename $i )
+       desc=$( get_ldap $p DESC )
+       if [ -z "$desc" ]; then
+	   desc="$( cat $i/desc ) $( cat $i/size  ) $( cat $i/fs )"
+       fi
+       echo -n "$p \"$desc\" on " >> /tmp/partitions
     done
-    unset IFS
     echo -n "dialog --colors --backtitle \"OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     cat /tmp/partitions >> /tmp/command
     echo ' 2> /tmp/partitions' >> /tmp/command
@@ -411,13 +406,10 @@ get_info()
     for i in `cat /tmp/partitions`
     do
         desc=$( get_ldap $i DESC )
-        if [ "$desc" ]; then
-            echo -n "$i $j 1 \"$desc\" $j 10 40 40 " >> /tmp/getdescriptions
-        else
-	    echo -n "$j:" > /tmp/myparts
-    	    grep "${i}:" /tmp/parts >> /tmp/myparts
-    	    gawk -F : '{ printf("\"%s\" %i 1 \"%s\" %i 10 40 40 ",$2,$1,$3,$1) }' /tmp/myparts   >> /tmp/getdescriptions
+        if [ -z "$desc" ]; then
+	   desc="$( cat /tmp/parts/$i/desc ) $( cat /tmp/parts/$i/size  )"
 	fi
+        echo -n "$i $j 1 \"$desc\" $j 10 40 40 " >> /tmp/getdescriptions
 	j=$((j+1))
     done
     echo -n " 2> /tmp/descriptions" >> /tmp/getdescriptions
@@ -592,30 +584,27 @@ clone()
 	    FORMAT=$( get_ldap $PARTITION FORMAT)
 	    if [ $FORMAT = 'clone' ]; then
 	        CTOOL=$( get_ldap $PARTITION ITOOL)
-            	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
+		saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-#	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
-	    if [ "${OS:0:3}" = "Win" ]; then
-	    	mkdir /mnt/$PARTITION
-		mount /dev/$PARTITION /mnt/$PARTITION
-		if [ -e /mnt/$PARTITION/script/ ]; then
-		    rm -r /mnt/$PARTITION/script/
-		fi
-		mkdir /mnt/$PARTITION/script/
-#		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
-#		sed -i s/OLDNAME/${HOSTNAME}/ /mnt/$PARTITION/script/domainjoin.bat
-		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
-		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
-		if [ "$JOIN" = "no" ]; then
-		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-		fi
-		umount /mnt/$PARTITION
+            if [ "${OS:0:3}" = "Win" ]; then
+               mkdir -p /mnt/$PARTITION
+               mount /dev/$PARTITION /mnt/$PARTITION
+               if [ -e /mnt/$PARTITION/script/ ]; then
+                     rm -r /mnt/$PARTITION/script/
+               fi
+               mkdir -p /mnt/$PARTITION/script/
+               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+               cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
+               sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
+               sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+               if [ "$JOIN" = "no" ]; then
+                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+               fi 
+               umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_ldap $PARTITION ITOOL)
-            saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
+            saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    chmod 775 /mnt/itool/images/$HW/$PARTITION.img
 	fi
 	sleep $SLEEP
@@ -694,33 +683,25 @@ make_autoconfig()
 		if [ -z "$MOUNTED" ]; then # We need the Presslufthammer!
 		    /usr/bin/ntfs-3g -o force,rw /dev/$PARTITION /mnt/$PARTITION
 		fi
-	        # If we do not have to join the domain do nothing else until the post script
 		JOIN=$( get_ldap $PARTITION JOIN)
-#		if [ "$JOIN" = "no" ]; then
-#		    continue
-#		fi
-#	        ProductID=$( get_ldap $PARTITION ProductID)
+	        ProductID=$( get_ldap $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
-#		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    #cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
 		fi
-		if [ -e /mnt/$PARTITION/script/ ]; then 
-		    rm -r /mnt/$PARTITION/script/
-		fi
-		mkdir /mnt/$PARTITION/script/
+		if [ -e /mnt/$PARTITION/script/ ]; then
+                    rm -r /mnt/$PARTITION/script/
+                fi
+		mkdir -p /mnt/$PARTITION/script/
 		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
 		if [ "$JOIN" = "no" ]; then
-		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-		fi
+                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+                fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
@@ -728,7 +709,7 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-	# If an postscript for this partition exist we have to execute it
+	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
 	fi
@@ -813,22 +794,34 @@ HWDN=`ldapsearch -x -LLL configurationKey=$HW dn | sed 's/dn: //'| sed '/^$/d' |
 echo "HWDN $HWDN"
 
 ## Get the list of the harddisks
-HDs=`sfdisk -s | grep -v loop | gawk -F: ' /dev/ { print $1 }' | sed 's#/dev/##g'` 
-echo "HDs $HDs"
+rm -rf /tmp/devs
+mkdir -p /tmp/devs
+HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
 ## Get the WORKGROUP
 WORKGROUP=$( ldapsearch -x -LLL configurationkey=SCHOOL_WORKGROUP configurationValue | grep 'configurationValue:' | sed 's/configurationValue: //')
 echo "WORKGROUP $WORKGROUP"
 
-# Activating DMA mode
-echo -n "" > /tmp/prts.fs
+## Analysing partitions
+rm -rf /tmp/parts
 for i in $HDs
 do
-   hdparm -d1 /dev/$i > /dev/null 2>&1
    parted -m -s /dev/$i print > /tmp/prts
-   echo '/^[0-9]/ { printf("/dev/%s%i:%s\n","'$i'",$1,$5) }' > /tmp/prts.awk
-   gawk -F : -f /tmp/prts.awk /tmp/prts >> /tmp/prts.fs
+   j=1
+   for p in $( ls /dev/$i[p0-9]* )
+   do
+     PART=$( echo $p | sed s#/dev/## )
+     mkdir -p /tmp/parts/$PART
+     echo "/^$j/ { printf(\"%s\",\$4) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/size
+     echo "/^$j/ { printf(\"%s\",\$5) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/fs
+     echo "/^$j/ { printf(\"%s\",\$6) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/desc
+     j=$((j+1))
+   done
 done
+
 echo "SLEEP $SLEEP"
 sleep $SLEEP
 
