@@ -40,7 +40,7 @@ backup_image()
 	fi
 	BACKUP=$(cat /tmp/itool.input)
 	if [ $BACKUP = "Yes" ]; then
-		backupname="$(ls --full-time /mnt/itool/images/$HW/$PARTITION.img | gawk '{print $6"-"$7}' | sed s/\.000000000// )-$PARTITION.img"
+		backupname="$(ls --full-time /mnt/itool/images/$HW/$PARTITION.img | gawk '{print $6"-"$7}' | sed s/\.000000000// | sed s/:/-/g )-$PARTITION.img"
 		mv /mnt/itool/images/$HW/$PARTITION.img /mnt/itool/images/$HW/$backupname
 	        dialog --colors --backtitle  "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
