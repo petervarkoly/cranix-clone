@@ -354,47 +354,19 @@ save_hw_info()
     fi
 }
 
-# Get oss sysconfig value
-get_sysconfig()
-{
-   ldapsearch -x -LLL configurationKey=$1 | grep 'configurationValue: ' | sed 's/configurationValue: //'
-}
-
 # Get the necessary configuration values from ldap
 # get_ldap Partition Variable
 get_ldap()
 {
-    RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
-    if [ -z "$RES" ]; then
-        RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
-    fi
-    if [ "$RES" = "${RES/: /}" ]; then
-        echo "${RES/ PART_$1_$2=/}"
-        return
-    fi
-    echo "${RES/: /}" | base64 -d | sed "s/PART_$1_$2=//"
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2" 
 }
 
 # Add the necessary configuration values to ldap
 # add_ldap Partition Variable "Value"
 add_ldap()
 {
-    echo "dn: $HWDN" > /tmp/ldap_modify
-    IFS=$'\n'
-    OLD=$( get_ldap $1 $2 )
-    for OLD in $( get_ldap $1 $2 )
-    do 
-        echo "delete: configurationValue"          >> /tmp/ldap_modify
-        echo "configurationValue: PART_$1_$2=$OLD" >> /tmp/ldap_modify
-        echo "-" >> /tmp/ldap_modify
-    done
-    if [ "$3" ]; then
-	echo "add: configurationValue" 		>> /tmp/ldap_modify
-	echo "configurationValue: PART_$1_$2=$3" 	>> /tmp/ldap_modify
-    fi
-
-    ldapmodify -x -D $BINDDN -y /tmp/userpassword -f /tmp/ldap_modify
-    unset IFS
+    VALUE=$( echo $3 | sed 's/ /%20/g' )
+    curl --insecure -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2/$VALUE"
 }
 
 get_info()
@@ -619,7 +591,7 @@ clone()
 
 get_cloned_partitions()
 {
-    ldapsearch -x -b $HWDN -s base | grep 'configurationValue: PART_' | sed 's/configurationValue: PART_//' | grep '_DESC=' | sed 's/_DESC=.*//' > /tmp/partitions
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/partitions" >  /tmp/partitions
 }
 
 mbr()
@@ -762,6 +734,7 @@ if [ -z "$SLEEP" ]; then
 fi
 
 . /tmp/dhcp.ini
+. /tmp/credentials
 
 MAC=$( echo $DHCPCHADDR | gawk '{ print toupper($1) }' )
 MACN=$( echo $MAC | sed "s/:/-/g")
@@ -770,36 +743,34 @@ echo "MAC      $MAC"
 echo "MACN     $MACN"
 echo "HOSTNAME $HOSTNAME"
 
-## Get the DN of the Workstation
-HOSTDN=`ldapsearch -x -LLL "(dhcpHWAddress=ethernet $MAC)" dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "HOSTDN $HOSTDN"
+## GET A SESSION TOKEN
+TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d 'username=admin&password=P3t3r0nly' 'https://admin/api/sessions/login' )
 
 # Check if I'm Master
-MASTER=$(ldapsearch -LLL -x "(&(dhcpHWAddress=ethernet $MAC)(configurationValue=MASTER=yes))" dn)
+MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/isMaster' )
 echo "MASTER $MASTER"
 
 # Get my conf value if not defined by the kernel parameter
 if  [ -z "$HW" ]; then           
-    HW=$(ldapsearch -LLL -x "(dhcpHWAddress=ethernet $MAC)" configurationValue | grep 'configurationValue: HW=' | sed 's/configurationValue: HW=//')
+    HW=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/hwconf' )
 fi
 
 echo "HW $HW"
 
 #Get my configuration description
-HWDESC=$(ldapsearch -x -LLL configurationKey=$HW description | grep 'description:' | sed 's/description: //')
+HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/description")
 echo "HWDESC $HWDESC"
 
 ## Get the DN of the HW configuration
 HWDN=`ldapsearch -x -LLL configurationKey=$HW dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "HWDN $HWDN"
 
 ## Get the list of the harddisks
 rm -rf /tmp/devs
 mkdir -p /tmp/devs
 HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
-## Get the WORKGROUP
-WORKGROUP=$( ldapsearch -x -LLL configurationkey=SCHOOL_WORKGROUP configurationValue | grep 'configurationValue:' | sed 's/configurationValue: //')
+## Get the DOMAIN
+DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/domainName' )
 echo "WORKGROUP $WORKGROUP"
 
 ## Analysing partitions
@@ -851,8 +822,6 @@ fi
 # Get Username and Password
 USERNAME=`cat /tmp/username`
 ## Get the BINDDN
-BINDDN=`ldapsearch -x -LLL uid=$USERNAME dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "BINDDN $BINDDN"
 
 ###############################
 ## Start the main dialog
