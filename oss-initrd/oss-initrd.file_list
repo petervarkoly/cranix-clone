@@ -40,8 +40,6 @@ joe:
 
 ntfsprogs:
 
-openldap2-client:
-
 parted:
 
 partclone:
@@ -68,6 +66,5 @@ util-linux:
 e mkdir -p -m 700 root/.ssh/
 x bin/*                     bin/
 x root/*                    root/
-x etc/openldap/ldap.conf    etc/openldap/ldap.conf
 x etc/ssh/sshd_config       etc/ssh/sshd_config
 x root/.ssh/authorized_keys root/.ssh/authorized_keys
