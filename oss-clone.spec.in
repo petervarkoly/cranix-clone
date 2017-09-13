@@ -76,9 +76,6 @@ exit 0
 %dir /srv/tftp
 /srv/tftp/bootlogo
 /srv/tftp/menu.c32
-/srv/tftp/boot
-/srv/tftp/boot/initrd
-/srv/tftp/boot/linux
 /srv/tftp/pxelinux.0
 /srv/tftp/gfxboot.c32
 /srv/tftp/chain.c32
