@@ -75,6 +75,8 @@ exit 0
 %config(noreplace) /srv/tftp/clouds.jpg
 %dir /srv/tftp
 /srv/tftp/bootlogo
+%dir /srv/tftp/clone
+/srv/tftp/clone/*
 /srv/tftp/menu.c32
 /srv/tftp/pxelinux.0
 /srv/tftp/gfxboot.c32
