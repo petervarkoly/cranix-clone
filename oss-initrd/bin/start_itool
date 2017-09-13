@@ -10,11 +10,6 @@ echo 'root: reboot' > /etc/yast.inf
 
 set > /tmp/SETTING
 
-# searching for LDAPBASE
-export LDAPBASE=`ldapsearch -x -b "" -s base -h ldap -LLL namingcontexts | grep namingContexts: | sed 's/namingContexts: //'`
-
-sed -i "s/LDAPBASE/$LDAPBASE/" /etc/openldap/ldap.conf
-
 ## Evaluate the boot parameter
 for i in `cat /proc/cmdline `
 do
@@ -32,17 +27,11 @@ fi
 ## Check for some boot parameter
 if [ -z "${SERVER}" ]
 then
-        export SERVER="install"
+        export SERVER="admin"
 fi
 
-echo "tftp             69/tcp    # Trivial File Transfer
-tftp             69/udp    # Trivial File Transfer" >> /etc/services
-atftp -g -r clone/login -l cloneToolLogin ${SERVER}
-if [ -s cloneToolLogin ]; then
-	mv cloneToolLogin /root/login
-fi
-atftp -g -r clone/clone.sh -l cloneTool ${SERVER}
-if [ -s cloneTool ]; then
-	mv cloneTool /root/clone.sh
-fi
+wget -O /root/login    ftp://${SERVER}/itool/config/login 
+wget -O /root/clone.sh ftp://${SERVER}/itool/config/clone.sh 
+
 /bin/bash ${CDEBUG} -l /root/login
+
