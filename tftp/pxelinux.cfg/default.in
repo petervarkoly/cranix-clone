@@ -17,15 +17,6 @@ LABEL CloneTool
         append initrd=clone/initrd install=exec:/bin/start_itool MemLimit=10 MemYASTText=10 Info=tftp://install/linuxrc.config ITOOL=partclone STARTCMD=clone SLEEP=1 apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe
 
 
-#LABEL KiwiCloneTool
-#        kernel boot/linux
-#        append initrd=boot/initrd vga=normal ramdisk_size=512000 ramdisk_blocksize=4096 kiwiserver=192.168.0.254 STARTCMD=clone SLEEP=1 ITOOL=partimage
-#        IPAPPEND 2
-
-
 #LABEL SUSE Linux Autoinstallation
 #      CONFIG pxelinux.cfg/autoyast
-
-#LABEL 64bit SUSE Linux Autoinstallation
-#      CONFIG pxelinux.cfg/autoyast64
 
