@@ -14,9 +14,11 @@ Packager:	peter@varkoly.de
 Group:		Productivity/
 Source:		%{name}.tar.bz2
 BuildArch:	noarch
-BuildRequires:	unzip openschool-base
+BuildRequires:  unzip
+BuildRequires:  oss-base
+BuildRequires:  installation-images-OSS
 BuildRoot:    %{_tmppath}/%{name}-root
-Requires:	openschool-base
+Requires:	oss-base
 
 %description
 This package provides a boot environment based on the openSUSE installation initrd for cloning clients.
@@ -82,14 +84,6 @@ exit 0
 /srv/tftp/chain.c32
 /srv/tftp/elilo.conf
 /srv/tftp/german.kbd
-/srv/tftp/clone
-/srv/tftp/clone/partitions.ids
-/srv/tftp/clone/clone.sh
-/srv/tftp/clone/initrd
-/srv/tftp/clone/initrd64
-/srv/tftp/clone/login
-/srv/tftp/clone/linux
-/srv/tftp/clone/linux64
 /srv/tftp/linuxrc.config_DEFAULT
 /srv/tftp/font.fnt
 /srv/tftp/pxelinux.cfg
