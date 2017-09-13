@@ -69,7 +69,7 @@ oss-initrd:
 dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi
 	mkdir $(PACKAGE)
-	cp -rp Makefile bin config tftp $(PACKAGE)
+	cp -rp Makefile bin config scripts tftp $(PACKAGE)
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	sed "s/@VERSION@/$(VERSION)/" $(PACKAGE).spec.in > $(PACKAGE).spec
 	sed -i "s/@RELEASE@/$(NRELEASE)/"  $(PACKAGE).spec
