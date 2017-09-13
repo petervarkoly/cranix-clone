@@ -15,7 +15,7 @@ install:
 	install -m 444 $(INSTUSER)  config/eliloboot.in          $(DESTDIR)/usr/share/oss/templates/eliloboot.in
 
 	#configure tftp service
-	mkdir -p $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
+	mkdir -p       $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
 	install -m 444 $(INSTUSER)  tftp/german.kbd               $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/bootlogo                 $(DESTDIR)/srv/tftp/bootlogo
@@ -30,9 +30,11 @@ install:
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/elilo*                   $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/boot/*			  $(DESTDIR)/srv/tftp/boot/
-	install -m 444 $(INSTUSER)  tftp/clone/*		  $(DESTDIR)/srv/tftp/clone/
 	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
-	
+
+	#Install the kernel and initrd from installation-images-OSS	
+	install -m 444 $(INSTUSER)  /SuSE/OSS/CD1/boot/x86_64/loader/initrd  $(DESTDIR)/srv/tftp/clone/
+	install -m 444 $(INSTUSER)  /CD1/boot/x86_64/loader/linux            $(DESTDIR)/srv/tftp/clone/
 	#configure itool service
 	mkdir -p -m 2750 $(DESTDIR)/srv/itool/config
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/images/manual
@@ -40,13 +42,13 @@ install:
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
 	
 	mkdir -p $(DESTDIR)/etc/xinetd.d/
-	mkdir -p $(DESTDIR)/srv/itool/config/
+	mkdir -p $(DESTDIR)/srv/itool/{scripts,config}
 	install -m 444 $(INSTUSER) config/xinetd.d.tftp.in $(DESTDIR)/etc/xinetd.d/tftp.in
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*bat             $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*ps1             $(DESTDIR)/srv/itool/config
-	install -m 644 $(INSTUSER) config/*sh              $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
+	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/itool/scripts
 	
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin

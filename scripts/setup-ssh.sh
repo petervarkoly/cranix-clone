@@ -31,7 +31,7 @@ fi
 ## Check for some boot parameter
 if [ -z "${SERVER}" ]
 then
-        export SERVER="install"
+        export SERVER="admin"
 fi
 
 ## if no nic was defined set it to eth0
@@ -82,7 +82,7 @@ then
     chmod 400 /tmp/userpassword
     chmod 400 /tmp/credentials
     echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
-    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
+    mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
     sleep $SLEEP
     if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     then
@@ -129,7 +129,7 @@ else
 	    chmod 400 /tmp/credentials
 	    chmod 400 /tmp/userpassword
     	    
-    	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
+    	    mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
     	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     	    then
     		/bin/bash ${CDEBUG} /root/${STARTCMD}.sh
@@ -748,12 +748,12 @@ clone()
             	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-#	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
-	    if [ "${OS:0:3}" = "Win" ]; then
+	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
 	    	mkdir /mnt/$PARTITION
 		mount /dev/$PARTITION /mnt/$PARTITION
-		if [ -e /mnt/$PARTITION/script/ ]; then
-		    rm -r /mnt/$PARTITION/script/
+		if [ -e /mnt/$PARTITION/script/ ]
+		then
+			rm -r /mnt/$PARTITION/script/
 		fi
 		mkdir /mnt/$PARTITION/script/
 #		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
@@ -762,9 +762,6 @@ clone()
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
-		if [ "$JOIN" = "no" ]; then
-		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-		fi
 		umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_ldap $PARTITION ITOOL)
@@ -849,10 +846,10 @@ make_autoconfig()
 		fi
 	        # If we do not have to join the domain do nothing else until the post script
 		JOIN=$( get_ldap $PARTITION JOIN)
-#		if [ "$JOIN" = "no" ]; then
-#		    continue
-#		fi
-#	        ProductID=$( get_ldap $PARTITION ProductID)
+		if [ "$JOIN" = "no" ]; then
+		    continue
+		fi
+	        ProductID=$( get_ldap $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
@@ -863,17 +860,10 @@ make_autoconfig()
 		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
 		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
 		fi
-		if [ -e /mnt/$PARTITION/script/ ]; then 
-		    rm -r /mnt/$PARTITION/script/
-		fi
-		mkdir /mnt/$PARTITION/script/
 		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
-		if [ "$JOIN" = "no" ]; then
-		    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-		fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
@@ -912,7 +902,7 @@ restore_partitions()
 	else
 		dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
-			--msgbox "Die Imagedatei existiert nicht:\n //install/itool/images/$HW/$PARTITION.img" 17 60
+			--msgbox "Die Imagedatei existiert nicht:\n //${SERVER}/itool/images/$HW/$PARTITION.img" 17 60
 	fi
 	sleep $SLEEP
         milestone "End  restore_partitions $PARTITION"
@@ -1014,104 +1004,3 @@ USERNAME=`cat /tmp/username`
 BINDDN=`ldapsearch -x -LLL uid=$USERNAME dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
 echo "BINDDN $BINDDN"
 
-###############################
-## Start the main dialog
-###############################
-while :
-do
-
-	if [ "$MASTER" ] ;then
-		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-			--nocancel --title "\Zb\Z1Hauptmenu" \
-			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
-			"Restore"    "Computer wiederherstellen" \
-			"Partition"  "Bestimmte Partitionen wiederherstellen" \
-			"Clone"      "Rechner klonen" \
-			"MBR"        "Master Boot Record wiederherstellen" \
-			"Manual"     "Manuelles Backup/Restore einer Partition" \
-			"Bash"       "Starte root-Shell (nur fuer Experten)"\
-			"Quit"       "Beenden"\
-			"About"      "About" 2> /tmp/clone.input
-	elif [ -z "$HW" ]; then
-		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-			--nocancel --title "\Zb\Z1Hauptmenu" \
-			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
-			"Manual"     "Manuelles Backup/Restore einer Partition" \
-			"Bash"       "Starte root-Shell (nur fuer Experten)"\
-			"Quit"       "Beenden"\
-			"About"      "About" 2> /tmp/clone.input
-	else
-		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-			--nocancel --title "\Zb\Z1Hauptmenu" \
-			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
-			"Restore"    "Computer wiederherstellen" \
-			"Partition"  "Bestimmte Partitionen wiederherstellen" \
-			"MBR"        "Master Boot Record wiederherstellen" \
-			"Manual"     "Manuelles Backup/Restore einer Partition" \
-			"Bash"       "Starte root-Shell (nur fuer Experten)"\
-			"Quit"       "Beenden"\
-			"About"      "About" 2> /tmp/clone.input
-	fi
-        MODUS=$(cat /tmp/clone.input)
-
-        ## Test if Help  ##
-        if [ "${MODUS}" != "${MODUS/HELP/}" ]; then
-                helpme ${MODUS/HELP/}
-                continue
-        fi
-
-        case $MODUS in
-		Restore)
-			get_cloned_partitions
-			initialize_disks
-			restore_partitions
-			restart
-		;;
-		Partition)
-			select_partitions_to_restore
-			restore_partitions
-			restart
-		;;
-		Clone)
-			## Menu Item Clone ##
-			select_partitions || continue
-			get_info          || continue
-			clone
-		;;
-		MBR)
-			## Menu Item MBR ##
-			mbr	
-		;;
-		Manual)
-			## Menu Item Manual ##
-			man_part	
-		;;
-		Bash)
-			## Menu Item Bash ##
-			/bin/bash
-		;;
-		Quit)
-			## Menu Item Quit ##
-			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-				--title     "\Zb\Z1Beenden" \
-				--ok-label  "Neu starten" \
-				--cancel-label "Abbrechen" \
-				--menu      "\nMoechten Sie das Clone Tool wirklich verlassen?\n\n\n " 15 60 1\
-				            "" "> Aktuell verbunden mit ${SERVER} <"
-
-			case $? in
-			0)
-				restart
-			;;
-			*)
-			esac
-		;;
-		About)
-                	## Menu Item About ##
-			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
-				--title "\Zb\Z1About" \
-				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Netzwerkkarte : ${NIC} : ${MAC}\n Festplatte(n): $HDs" 17 60
-		;;
-	esac
-
-done

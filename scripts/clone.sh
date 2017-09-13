@@ -1,156 +1,3 @@
-#!/bin/bash
-trap "" 0 1 2 5 15
-
-for i in `cat /proc/cmdline `
-do
-    echo $i | grep -q '=' && eval "export $i";
-done
-
-mkdir -p /mnt/{hdr,hdp,itool}
-umount /mnt/itool > /dev/null 2>&1
-rm -Rf /tmp/* > /dev/null 2>&1
-
-WARNING='Anmeldung am System war nicht moeglich!\n\n
-Dies koennte mehrere Gruende haben.\n\n
- - Falscher Benutzername\n
- - Falsches Passwort\n
- - Fehlerhafte Konfiguration des Server\n
- - Keine Verbindung zum Server\n\n\n
-Moechten Sie es erneut versuchen?'
-
-## Check for some boot parameter
-if [ -z "${ITOOL}" ]
-then
-        export ITOOL="partclone"
-fi
-## Check for some boot parameter
-if [ -z "${STARTCMD}" ]
-then
-        export STARTCMD="clone"
-fi
-## Check for some boot parameter
-if [ -z "${SERVER}" ]
-then
-        export SERVER="install"
-fi
-
-## if no nic was defined set it to eth0
-if [ -z "${NIC}" ]
-then
-        for i in $( hwinfo --netcard | grep "Device File:"  | gawk -F": " '{ print $2 }' )
-        do
-                /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $i
-                if [ -e /tmp/dhcp.ini ]
-                then
-                        export NIC=$i
-                        break
-                fi
-        done
-else
-        /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $NIC
-fi
-
-. /tmp/dhcp.ini
-IPADDR=${IPADDR/\/*/}
-
-if [ -z "${HOSTNAME}" ]
-then
-        export HOSTNAME=`ldapsearch -x -h ldap -LLL aRecord=$IPADDR relativeDomainName | grep -i relativeDomainName: | sed 's/relativeDomainName: //i'`
-        echo "HOSTNAME='${HOSTNAME}'" >> /tmp/dhcp.ini
-fi
-
-if [ -z "${DHCPCHADDR}" ]
-then
-        DHCPCHADDR=$( cat /sys/class/net/${NIC}/address )
-        echo "DHCPCHADDR='${DHCPCHADDR}'" >> /tmp/dhcp.ini
-fi
-
-if [ -z "${SLEEP}" ]
-then
-        export SLEEP=1
-fi
-
-
-export HOSTNAME=${HOSTNAME%%.*}
-
-if [ "$MODUS" = "AUTO" ]
-then
-    echo "username=register" >  /tmp/credentials
-    echo "password=register" >> /tmp/credentials 
-    echo "register" > /tmp/username
-    echo "register" > /tmp/userpassword
-    chmod 400 /tmp/userpassword
-    chmod 400 /tmp/credentials
-    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
-    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
-    sleep $SLEEP
-    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
-    then
-        bash ${CDEBUG} /root/${STARTCMD}.sh
-        exit 0
-    else
-    	dialog  --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
-    	if [ $? -ne 0 ]
-    	then
-    	    clear
-    	    exit 0
-	else
-	    export MODUS=""
-	    /root/login
-	    exit 0
-    	fi
-    fi
-else
-    while test -e /tmp
-    do
-        dialog --backtitle "${STARTCMD}" --title "Anmeldung" --cancel-label "Beenden" --inputbox "Bitte geben Sie Ihren Benutzernamen ein:\n" 10 60 2> /tmp/username
-        
-        if [ $? -eq 1 ]
-        then
-		clear
-		exit 0
-        else
-    	USERNAME=$(cat /tmp/username)
-	USERNAME=$(echo $USERNAME | tr '[:upper:]' '[:lower:]' 2>/dev/null)
-        
-    	if [ ! "$USERNAME" ]
-    	then
-    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Der Benutzername $USERNAME ist ungueltig!" 15 60
-    	elif [ "$USERNAME" = "root" -o "$USERNAME" = "administrator" ]
-    	then
-    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Die Anmeldung an cloneTool als $USERNAME ist nicht möglich!" 15 60
-    	else
-    	    dialog --backtitle "${STARTCMD}" --title "Anmeldung" --no-cancel \
-		   --insecure --passwordbox "Bitte geben Sie das Passwort fuer $USERNAME ein:\n" 10 60 2> /tmp/userpassword
-
-	    echo -n "username=" > /tmp/credentials; cat /tmp/username >> /tmp/credentials;
-	    echo >> /tmp/credentials;
-	    echo -n "password=" >>/tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
-	    chmod 400 /tmp/credentials
-	    chmod 400 /tmp/userpassword
-    	    
-    	    mount -t cifs -o credentials=/tmp/credentials //install/itool /mnt/itool
-    	    if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
-    	    then
-    		/bin/bash ${CDEBUG} /root/${STARTCMD}.sh
-    		exit 0
-    	    else
-    		umount /mnt/itool
-    		sleep $SLEEP
-    		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
-    	    
-    		if [ $? -ne 0 ]
-    		then
-			clear
-			exit 0	
-    		fi
-    	    fi
-    	fi
-        fi
-    done
-fi
-
-exit
 ###############################################################################
 # Script:       clone.sh
 # Copyright (c) 2010 Peter Varkoly, Fuerth, Germany.
@@ -193,7 +40,7 @@ backup_image()
 	fi
 	BACKUP=$(cat /tmp/itool.input)
 	if [ $BACKUP = "Yes" ]; then
-		backupname="$(ls --full-time /mnt/itool/images/$HW/$PARTITION.img | gawk '{print $6"-"$7}' | sed s/\.000000000// )-$PARTITION.img"
+		backupname="$(ls --full-time /mnt/itool/images/$HW/$PARTITION.img | gawk '{print $6"-"$7}' | sed s/\.000000000// | sed s/:/-/g )-$PARTITION.img"
 		mv /mnt/itool/images/$HW/$PARTITION.img /mnt/itool/images/$HW/$backupname
 	        dialog --colors --backtitle  "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
@@ -203,7 +50,7 @@ backup_image()
 }
 #########################
 # The image save cmd
-# saveimage /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
+# saveimage $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
 ########################
 saveimage ()
 {
@@ -226,11 +73,11 @@ saveimage ()
 	fi
         case $TOOL in
                 partclone)
-			FSTYPE=$( grep $1 /tmp/prts.fs | gawk -F : '{ print $2 }' )
-			partclone.$FSTYPE -c -s $1 -O $2
+			FSTYPE=$( cat /tmp/parts/$1/fs )
+			partclone.$FSTYPE -c -s /dev/$1 -O $2
 		;;
                 partimage)
-                        partimage -z1 -f3 -V0 -o -d --batch save $1 $2
+                        partimage -z1 -f3 -V0 -o -d --batch save /dev/$1 $2
                 ;;
                 dd)
 			echo "#################################################"
@@ -245,7 +92,7 @@ saveimage ()
 			echo "#    Das erstellen des Images wurde gestartet.  #"
 			echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 			echo "#################################################"
-                        dd_rescue -y 0 -f -a $1 /dev/stdout | gzip > $2
+                        dd_rescue -y 0 -f -a /dev/$1 /dev/stdout | gzip > $2
 			sync
                 ;;
         esac
@@ -255,7 +102,7 @@ saveimage ()
 
 #########################
 # The image restore cmd
-# restore /dev/$PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
+# restore $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
 ########################
 restore ()
 {
@@ -313,7 +160,7 @@ cls ()
 
 restart()
 {
-	umount /mnt/itool
+	#umount /mnt/itool
 	sleep 2
 	exit 0
 }
@@ -355,11 +202,14 @@ man_part()
 {
    [ -e /tmp/disklist ]   && rm -f /tmp/disklist
    [ -e /tmp/partitions ] && rm -f /tmp/partitions
-   for i in $HDs
+   for i in $( ls -d /tmp/parts/* )
    do
-      parted -m -s /dev/$i print >> /tmp/disklist
-      echo '/^[0-9]/ { printf("\"%s%i\" \"%s\t%s\t%s\" ","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
-      gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/partitions
+      fs=$( cat $i/fs )
+      if [ -z "$fs" -o "${fs/linux-swap}" != "$fs" ]; then
+         continue
+      fi
+      p=$( basename $i )
+      echo -n "$p '$(cat $i/desc) $(cat $i/size) $(cat $i/fs)' " >> /tmp/partitions
    done
    echo -n 'dialog --colors --backtitle "CloneTool - '${IVERSION}'" --title "Manuelles Backup/Restore einer Partition" --menu  "Zur Verfuegung stehende Partitionen:" 20 50 8 ' > /tmp/command
    cat /tmp/partitions >> /tmp/command
@@ -411,7 +261,7 @@ man_part()
 	if [ $MBR = "yes" ]; then
 		dd of=/mnt/itool/images/manual/$NAME.parting if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 	fi
-        saveimage $PARTITION  /mnt/itool/images/manual/$NAME.img $TOOL
+        saveimage $( baseaname $PARTITION ) /mnt/itool/images/manual/$NAME.img $TOOL
         chmod 775 /mnt/itool/images/manual/$NAME.img
         sleep $SLEEP
    else
@@ -462,28 +312,20 @@ select_partitions()
     # checklist dialog to select the partitions to clone or to restore.
     # This will be saved into the file /tmp/partitions
     [ -e /tmp/disklist ]   && rm -f /tmp/disklist
-    [ -e /tmp/parts  ]     && rm -f /tmp/parts
     [ -e /tmp/partitions ] && rm -f /tmp/partitions
-    for i in $HDs
+    for i in $( ls -d /tmp/parts/* )
     do
-       parted -m -s /dev/$i print > /tmp/disklist
-       sed -i /type=05/d    /tmp/disklist
-       sed -i /linux-swap/d /tmp/disklist
-       echo '/^[0-9]/ { printf("%s%i:%s\t%s\t%s\n","'$i'",$1,$4,$7,$6) }' > /tmp/partitions.awk
-       gawk -F : -f /tmp/partitions.awk /tmp/disklist >> /tmp/parts
-    done 
-    IFS=$'\n'
-    for i in `cat /tmp/parts`
-    do
-        part=$( echo "$i" | gawk -F : '{ print $1 }' )
-	desc=$( get_ldap $part DESC )
-	if [ "$desc" ]; then
-	    echo -n "$part \"$desc\" on " >> /tmp/partitions
-	else
-    	    echo $i | gawk -F : '{ printf("%s \"%s\" on ",$1,$2) }' >> /tmp/partitions
-	fi
+       fs=$( cat $i/fs )
+       if [ -z "$fs" -o "${fs/linux-swap}" != "$fs" ]; then
+          continue
+       fi
+       p=$( basename $i )
+       desc=$( get_ldap $p DESC )
+       if [ -z "$desc" ]; then
+	   desc="$( cat $i/desc ) $( cat $i/size  ) $( cat $i/fs )"
+       fi
+       echo -n "$p \"$desc\" on " >> /tmp/partitions
     done
-    unset IFS
     echo -n "dialog --colors --backtitle \"OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     cat /tmp/partitions >> /tmp/command
     echo ' 2> /tmp/partitions' >> /tmp/command
@@ -512,47 +354,19 @@ save_hw_info()
     fi
 }
 
-# Get oss sysconfig value
-get_sysconfig()
-{
-   ldapsearch -x -LLL configurationKey=$1 | grep 'configurationValue: ' | sed 's/configurationValue: //'
-}
-
 # Get the necessary configuration values from ldap
 # get_ldap Partition Variable
 get_ldap()
 {
-    RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HOSTDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
-    if [ -z "$RES" ]; then
-        RES=$( ldapsearch -x -o ldif-wrap=no -LLL -b $HWDN -s base "configurationValue=PART_$1_$2*" | grep -i "configurationValue: PART_$1_$2=" | sed "s/configurationValue://" )
-    fi
-    if [ "$RES" = "${RES/: /}" ]; then
-        echo "${RES/ PART_$1_$2=/}"
-        return
-    fi
-    echo "${RES/: /}" | base64 -d | sed "s/PART_$1_$2=//"
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2" 
 }
 
 # Add the necessary configuration values to ldap
 # add_ldap Partition Variable "Value"
 add_ldap()
 {
-    echo "dn: $HWDN" > /tmp/ldap_modify
-    IFS=$'\n'
-    OLD=$( get_ldap $1 $2 )
-    for OLD in $( get_ldap $1 $2 )
-    do 
-        echo "delete: configurationValue"          >> /tmp/ldap_modify
-        echo "configurationValue: PART_$1_$2=$OLD" >> /tmp/ldap_modify
-        echo "-" >> /tmp/ldap_modify
-    done
-    if [ "$3" ]; then
-	echo "add: configurationValue" 		>> /tmp/ldap_modify
-	echo "configurationValue: PART_$1_$2=$3" 	>> /tmp/ldap_modify
-    fi
-
-    ldapmodify -x -D $BINDDN -y /tmp/userpassword -f /tmp/ldap_modify
-    unset IFS
+    VALUE=$( echo $3 | sed 's/ /%20/g' )
+    curl --insecure -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2/$VALUE"
 }
 
 get_info()
@@ -564,13 +378,10 @@ get_info()
     for i in `cat /tmp/partitions`
     do
         desc=$( get_ldap $i DESC )
-        if [ "$desc" ]; then
-            echo -n "$i $j 1 \"$desc\" $j 10 40 40 " >> /tmp/getdescriptions
-        else
-	    echo -n "$j:" > /tmp/myparts
-    	    grep "${i}:" /tmp/parts >> /tmp/myparts
-    	    gawk -F : '{ printf("\"%s\" %i 1 \"%s\" %i 10 40 40 ",$2,$1,$3,$1) }' /tmp/myparts   >> /tmp/getdescriptions
+        if [ -z "$desc" ]; then
+	   desc="$( cat /tmp/parts/$i/desc ) $( cat /tmp/parts/$i/size  )"
 	fi
+        echo -n "$i $j 1 \"$desc\" $j 10 40 40 " >> /tmp/getdescriptions
 	j=$((j+1))
     done
     echo -n " 2> /tmp/descriptions" >> /tmp/getdescriptions
@@ -745,27 +556,27 @@ clone()
 	    FORMAT=$( get_ldap $PARTITION FORMAT)
 	    if [ $FORMAT = 'clone' ]; then
 	        CTOOL=$( get_ldap $PARTITION ITOOL)
-            	saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
+		saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-	    if [ "${OS:0:3}" = "Win" -a "$JOIN" != "no" ]; then
-	    	mkdir /mnt/$PARTITION
-		mount /dev/$PARTITION /mnt/$PARTITION
-		if [ -e /mnt/$PARTITION/script/ ]
-		then
-			rm -r /mnt/$PARTITION/script/
-		fi
-		mkdir /mnt/$PARTITION/script/
-#		cp "/mnt/itool/config/${OS}SimpleJoin.bat" /mnt/$PARTITION/script/domainjoin.bat
-#		sed -i s/OLDNAME/${HOSTNAME}/ /mnt/$PARTITION/script/domainjoin.bat
-		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
-		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
-		umount /mnt/$PARTITION
+            if [ "${OS:0:3}" = "Win" ]; then
+               mkdir -p /mnt/$PARTITION
+               mount /dev/$PARTITION /mnt/$PARTITION
+               if [ -e /mnt/$PARTITION/script/ ]; then
+                     rm -r /mnt/$PARTITION/script/
+               fi
+               mkdir -p /mnt/$PARTITION/script/
+               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+               cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
+               sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
+               sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+               if [ "$JOIN" = "no" ]; then
+                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+               fi 
+               umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_ldap $PARTITION ITOOL)
-            saveimage /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
+            saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    chmod 775 /mnt/itool/images/$HW/$PARTITION.img
 	fi
 	sleep $SLEEP
@@ -780,7 +591,7 @@ clone()
 
 get_cloned_partitions()
 {
-    ldapsearch -x -b $HWDN -s base | grep 'configurationValue: PART_' | sed 's/configurationValue: PART_//' | grep '_DESC=' | sed 's/_DESC=.*//' > /tmp/partitions
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/partitions" >  /tmp/partitions
 }
 
 mbr()
@@ -844,26 +655,25 @@ make_autoconfig()
 		if [ -z "$MOUNTED" ]; then # We need the Presslufthammer!
 		    /usr/bin/ntfs-3g -o force,rw /dev/$PARTITION /mnt/$PARTITION
 		fi
-	        # If we do not have to join the domain do nothing else until the post script
 		JOIN=$( get_ldap $PARTITION JOIN)
-		if [ "$JOIN" = "no" ]; then
-		    continue
-		fi
 	        ProductID=$( get_ldap $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
-#		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    #cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Unattend.xml
-		    #sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Unattend.xml
 		fi
+		if [ -e /mnt/$PARTITION/script/ ]; then
+                    rm -r /mnt/$PARTITION/script/
+                fi
+		mkdir -p /mnt/$PARTITION/script/
 		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+		if [ "$JOIN" = "no" ]; then
+                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+                fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
@@ -871,7 +681,7 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-	# If an postscript for this partition exist we have to execute it
+	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
 	fi
@@ -902,7 +712,7 @@ restore_partitions()
 	else
 		dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
-			--msgbox "Die Imagedatei existiert nicht:\n //install/itool/images/$HW/$PARTITION.img" 17 60
+			--msgbox "Die Imagedatei existiert nicht:\n //${SERVER}/itool/images/$HW/$PARTITION.img" 17 60
 	fi
 	sleep $SLEEP
         milestone "End  restore_partitions $PARTITION"
@@ -924,6 +734,7 @@ if [ -z "$SLEEP" ]; then
 fi
 
 . /tmp/dhcp.ini
+. /tmp/credentials
 
 MAC=$( echo $DHCPCHADDR | gawk '{ print toupper($1) }' )
 MACN=$( echo $MAC | sed "s/:/-/g")
@@ -932,46 +743,56 @@ echo "MAC      $MAC"
 echo "MACN     $MACN"
 echo "HOSTNAME $HOSTNAME"
 
-## Get the DN of the Workstation
-HOSTDN=`ldapsearch -x -LLL "(dhcpHWAddress=ethernet $MAC)" dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "HOSTDN $HOSTDN"
+## GET A SESSION TOKEN
+TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d 'username=admin&password=P3t3r0nly' 'https://admin/api/sessions/login' )
 
 # Check if I'm Master
-MASTER=$(ldapsearch -LLL -x "(&(dhcpHWAddress=ethernet $MAC)(configurationValue=MASTER=yes))" dn)
+MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/isMaster' )
 echo "MASTER $MASTER"
 
 # Get my conf value if not defined by the kernel parameter
 if  [ -z "$HW" ]; then           
-    HW=$(ldapsearch -LLL -x "(dhcpHWAddress=ethernet $MAC)" configurationValue | grep 'configurationValue: HW=' | sed 's/configurationValue: HW=//')
+    HW=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/hwconf' )
 fi
 
 echo "HW $HW"
 
 #Get my configuration description
-HWDESC=$(ldapsearch -x -LLL configurationKey=$HW description | grep 'description:' | sed 's/description: //')
+HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/description")
 echo "HWDESC $HWDESC"
 
 ## Get the DN of the HW configuration
 HWDN=`ldapsearch -x -LLL configurationKey=$HW dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "HWDN $HWDN"
 
 ## Get the list of the harddisks
-HDs=`sfdisk -s | grep -v loop | gawk -F: ' /dev/ { print $1 }' | sed 's#/dev/##g'` 
-echo "HDs $HDs"
+rm -rf /tmp/devs
+mkdir -p /tmp/devs
+HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
-## Get the WORKGROUP
-WORKGROUP=$( ldapsearch -x -LLL configurationkey=SCHOOL_WORKGROUP configurationValue | grep 'configurationValue:' | sed 's/configurationValue: //')
+## Get the DOMAIN
+DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/domainName' )
 echo "WORKGROUP $WORKGROUP"
 
-# Activating DMA mode
-echo -n "" > /tmp/prts.fs
+## Analysing partitions
+rm -rf /tmp/parts
 for i in $HDs
 do
-   hdparm -d1 /dev/$i > /dev/null 2>&1
    parted -m -s /dev/$i print > /tmp/prts
-   echo '/^[0-9]/ { printf("/dev/%s%i:%s\n","'$i'",$1,$5) }' > /tmp/prts.awk
-   gawk -F : -f /tmp/prts.awk /tmp/prts >> /tmp/prts.fs
+   j=1
+   for p in $( ls /dev/$i[p0-9]* )
+   do
+     PART=$( echo $p | sed s#/dev/## )
+     mkdir -p /tmp/parts/$PART
+     echo "/^$j/ { printf(\"%s\",\$4) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/size
+     echo "/^$j/ { printf(\"%s\",\$5) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/fs
+     echo "/^$j/ { printf(\"%s\",\$6) }" > /tmp/prts.awk
+     gawk -F : -f /tmp/prts.awk /tmp/prts > /tmp/parts/$PART/desc
+     j=$((j+1))
+   done
 done
+
 echo "SLEEP $SLEEP"
 sleep $SLEEP
 
@@ -1001,6 +822,105 @@ fi
 # Get Username and Password
 USERNAME=`cat /tmp/username`
 ## Get the BINDDN
-BINDDN=`ldapsearch -x -LLL uid=$USERNAME dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
-echo "BINDDN $BINDDN"
 
+###############################
+## Start the main dialog
+###############################
+while :
+do
+
+	if [ "$MASTER" ] ;then
+		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+			--nocancel --title "\Zb\Z1Hauptmenu" \
+			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
+			"Restore"    "Computer wiederherstellen" \
+			"Partition"  "Bestimmte Partitionen wiederherstellen" \
+			"Clone"      "Rechner klonen" \
+			"MBR"        "Master Boot Record wiederherstellen" \
+			"Manual"     "Manuelles Backup/Restore einer Partition" \
+			"Bash"       "Starte root-Shell (nur fuer Experten)"\
+			"Quit"       "Beenden"\
+			"About"      "About" 2> /tmp/clone.input
+	elif [ -z "$HW" ]; then
+		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+			--nocancel --title "\Zb\Z1Hauptmenu" \
+			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
+			"Manual"     "Manuelles Backup/Restore einer Partition" \
+			"Bash"       "Starte root-Shell (nur fuer Experten)"\
+			"Quit"       "Beenden"\
+			"About"      "About" 2> /tmp/clone.input
+	else
+		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+			--nocancel --title "\Zb\Z1Hauptmenu" \
+			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
+			"Restore"    "Computer wiederherstellen" \
+			"Partition"  "Bestimmte Partitionen wiederherstellen" \
+			"MBR"        "Master Boot Record wiederherstellen" \
+			"Manual"     "Manuelles Backup/Restore einer Partition" \
+			"Bash"       "Starte root-Shell (nur fuer Experten)"\
+			"Quit"       "Beenden"\
+			"About"      "About" 2> /tmp/clone.input
+	fi
+        MODUS=$(cat /tmp/clone.input)
+
+        ## Test if Help  ##
+        if [ "${MODUS}" != "${MODUS/HELP/}" ]; then
+                helpme ${MODUS/HELP/}
+                continue
+        fi
+
+        case $MODUS in
+		Restore)
+			get_cloned_partitions
+			initialize_disks
+			restore_partitions
+			restart
+		;;
+		Partition)
+			select_partitions_to_restore
+			restore_partitions
+			restart
+		;;
+		Clone)
+			## Menu Item Clone ##
+			select_partitions || continue
+			get_info          || continue
+			clone
+		;;
+		MBR)
+			## Menu Item MBR ##
+			mbr	
+		;;
+		Manual)
+			## Menu Item Manual ##
+			man_part	
+		;;
+		Bash)
+			## Menu Item Bash ##
+			/bin/bash
+		;;
+		Quit)
+			## Menu Item Quit ##
+			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+				--title     "\Zb\Z1Beenden" \
+				--ok-label  "Neu starten" \
+				--cancel-label "Abbrechen" \
+				--menu      "\nMoechten Sie das Clone Tool wirklich verlassen?\n\n\n " 15 60 1\
+				            "" "> Aktuell verbunden mit ${SERVER} <"
+
+			case $? in
+			0)
+				restart
+			;;
+			*)
+			esac
+		;;
+		About)
+                	## Menu Item About ##
+			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
+				--title "\Zb\Z1About" \
+				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Netzwerkkarte : ${NIC} : ${MAC}\n Festplatte(n): $HDs" 17 60
+		;;
+	esac
+
+done
