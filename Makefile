@@ -6,7 +6,7 @@ PACKAGE         = oss-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
-OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:openleap-42-3/installation-images/
+OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:openleap-42-3/
 
 install:
 	#configure tftp boot template service
@@ -57,10 +57,10 @@ install:
 oss-initrd:
 	cd oss-initrd; tar cjf ../oss-initrd.tar.bz2 *;
 	for i in $(OSCDIRS); do \
-	   if [ -d $$i ]; then \
-	      cd $$i; osc up; cd $(HERE); \
+	   if [ -d $$i/installation-images ]; then \
+	      cd $$i/installation-images; osc up; cd $(HERE); \
 	      cp oss-initrd.tar.bz2 $$i; \
-	      cd $$i; \
+	      cd $$i/installation-images; \
 	      osc vc; \
 	      osc ci -m "New Build Version"; \
 	   fi; \
@@ -73,14 +73,16 @@ dist:
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	sed "s/@VERSION@/$(VERSION)/" $(PACKAGE).spec.in > $(PACKAGE).spec
 	sed -i "s/@RELEASE@/$(NRELEASE)/"  $(PACKAGE).spec
-	if [ -d /data1/OSC/home\:openschoolserver/$(PACKAGE) ] ; then \
-	        cd /data1/OSC/home\:openschoolserver/$(PACKAGE); osc up; cd $(HERE);\
-	        cp $(PACKAGE).tar.bz2  $(PACKAGE).spec /data1/OSC/home\:openschoolserver/$(PACKAGE); \
-	        cd /data1/OSC/home\:openschoolserver/$(PACKAGE); \
-	        osc vc; \
-		osc addremove; \
-	        osc ci -m "New Build Version"; \
-	fi 
+	for i in $(OSCDIRS); do \
+		if [ -d $$i/$(PACKAGE) ] ; then \
+			cd $$i/$(PACKAGE); osc up; cd $(HERE);\
+			cp $(PACKAGE).tar.bz2  $(PACKAGE).spec $$i/$(PACKAGE); \
+			cd $$i/$(PACKAGE); \
+			osc vc; \
+			osc addremove; \
+			osc ci -m "New Build Version"; \
+		fi; \
+	done
 	echo $(NRELEASE) > RELEASE
 	git commit -a -m "New release"
 	git push
