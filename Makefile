@@ -6,6 +6,7 @@ PACKAGE         = oss-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
+OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:oss-clone:openleap-42-2/installation-images-openSUSE /home/OSC/home:varkoly:OSS-4-0:oss-clone:factory/installation-images-openSUSE
 
 install:
 	#configure tftp boot template service
@@ -53,13 +54,15 @@ install:
 
 oss-initrd:
 	cd oss-initrd; tar cjf ../oss-initrd.tar.bz2 *;
-	if [ -d /data1/OSC/home\:openschoolserver/installation-images-openSUSE ] ; then \
-		cd /data1/OSC/home\:openschoolserver/installation-images-openSUSE; osc up; cd $(HERE); \
-		cp oss-initrd.tar.bz2 /data1/OSC/home\:openschoolserver/installation-images-openSUSE; \
-		cd /data1/OSC/home\:openschoolserver/installation-images-openSUSE; \
-		osc vc; \
-                osc ci -m "New Build Version"; \
-        fi
+	for i in $(OSCDIRS); do \
+	   if [ -d $$i ]; then \
+	      cd $$i; osc up; cd $(HERE); \
+	      cp oss-initrd.tar.bz2 $$i; \
+	      cd $$i; \
+	      osc vc; \
+	      osc ci -m "New Build Version"; \
+	   fi; \
+	done 
 
 dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi

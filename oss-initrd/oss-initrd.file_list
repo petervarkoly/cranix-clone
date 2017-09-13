@@ -3,9 +3,6 @@
 # oss itool extra packages
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-atftp:
-    /usr/bin/atftp
-
 coreutils:
     /usr/bin/base64
     /usr/bin/basename
