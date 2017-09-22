@@ -39,31 +39,9 @@ make DESTDIR=%{buildroot} install
 %post
 
 # setup rights
-if [ -d /home/sysadmins/admin ]
+if [ -d /home/groups ]
 then
-   chmod     755      /srv/itool
-   chgrp -R SYSADMINS /srv/itool
-   chmod    2755      /srv/itool/config
-   chmod    2775      /srv/itool/hwinfo
-   setfacl -m g:WORKSTATIONS:rwx  /srv/itool/hwinfo
-   chmod -R 2775      /srv/itool/images
-   setfacl -m g:SYSADMINS:rwx  /srv/itool/images
-   chmod -R 755       /srv/itool/ROOT
-   /usr/sbin/oss_setup_pxe_enviroment.sh &> /dev/null
-   DATE=`date +%Y-%m-%d:%H-%M`
-   if [ -e /etc/xinetd.d/tftp ]
-   then
-     cp /etc/xinetd.d/tftp /etc/xinetd.d/tftp.$DATE
-   fi
-   cp /etc/xinetd.d/tftp.in /etc/xinetd.d/tftp
-   if [ ! -e /usr/share/oss/templates/pxeboot ]
-   then
-       cp /usr/share/oss/templates/pxeboot.in /usr/share/oss/templates/pxeboot
-   fi
-   if [ ! -e /usr/share/oss/templates/eliloboot ]
-   then
-       cp /usr/share/oss/templates/eliloboot.in /usr/share/oss/templates/eliloboot
-   fi
+   /usr/sbin/oss_reset_itool_rights.sh
 fi
 exit 0
 
