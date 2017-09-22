@@ -238,3 +238,4 @@ if( "$mode" -eq "rename" ){
     AddWsToDomain
     RemoveScriptDir
 }
+

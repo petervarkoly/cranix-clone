@@ -48,8 +48,7 @@ fi
 . /tmp/dhcp.ini
 IPADDR=${IPADDR/\/*/}
 
-export HOSTNAME=`ldapsearch -x -h ldap -LLL aRecord=$IPADDR relativeDomainName | grep -i relativeDomainName: | sed 's/relativeDomainName: //i'`
-echo "HOSTNAME='${HOSTNAME}'" >> /tmp/dhcp.ini
+#TODO EVALUATE HOSTNAME 
 
 if [ -z "${DHCPCHADDR}" ]
 then
@@ -106,10 +105,13 @@ else
     	USERNAME=$(cat /tmp/username)
 	USERNAME=$(echo $USERNAME | tr '[:upper:]' '[:lower:]' 2>/dev/null)
         
-    	if [ ! "$USERNAME" ]
+	if [ "$USERNAME" = "administrator" -o "$USERNAME" = "admin" ]; then
+		USERNAME="Administrator"
+	fi
+	if [ ! "$USERNAME" ]
     	then
     		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Der Benutzername $USERNAME ist ungueltig!" 15 60
-    	elif [ "$USERNAME" = "root" -o "$USERNAME" = "administrator" ]
+    	elif [ "$USERNAME" = "root" ]
     	then
     		dialog --backtitle "${STARTCMD}" --title "Anmeldung" --msgbox "Die Anmeldung an cloneTool als $USERNAME ist nicht möglich!" 15 60
     	else

@@ -320,7 +320,7 @@ select_partitions()
           continue
        fi
        p=$( basename $i )
-       desc=$( get_ldap $p DESC )
+       desc=$( get_config $p DESC )
        if [ -z "$desc" ]; then
 	   desc="$( cat $i/desc ) $( cat $i/size  ) $( cat $i/fs )"
        fi
@@ -354,16 +354,16 @@ save_hw_info()
     fi
 }
 
-# Get the necessary configuration values from ldap
-# get_ldap Partition Variable
-get_ldap()
+# Get the necessary configuration values from server
+# get_config Partition Variable
+get_config()
 {
     curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2" 
 }
 
-# Add the necessary configuration values to ldap
-# add_ldap Partition Variable "Value"
-add_ldap()
+# Add the necessary configuration values to server
+# set_config Partition Variable "Value"
+set_config()
 {
     VALUE=$( echo $3 | sed 's/ /%20/g' )
     curl --insecure -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2/$VALUE"
@@ -377,7 +377,7 @@ get_info()
     let j=1
     for i in `cat /tmp/partitions`
     do
-        desc=$( get_ldap $i DESC )
+        desc=$( get_config $i DESC )
         if [ -z "$desc" ]; then
 	   desc="$( cat /tmp/parts/$i/desc ) $( cat /tmp/parts/$i/size  )"
 	fi
@@ -396,8 +396,8 @@ get_info()
     for PARTITION in `cat /tmp/partitions`
     do
         DESC=`gawk "NR==$i { print }" /tmp/descriptions`
-	add_ldap $PARTITION DESC "$DESC"
-	OS=$( get_ldap $PARTITION OS )
+	set_config $PARTITION DESC "$DESC"
+	OS=$( get_config $PARTITION OS )
 	WinBoot="off"; Win10="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
 	case $OS in
 	    WinBoot) WinBoot="on";;
@@ -418,18 +418,18 @@ get_info()
 		Linux    "Linux"                $Linux \
 		Data     "Partition fuer Daten" $Data 2> /tmp/out
 	OS=`cat /tmp/out`
-	add_ldap $PARTITION OS $OS
+	set_config $PARTITION OS $OS
         sleep $SLEEP
 	
 	case $OS in
 	    WinBoot)
-	        add_ldap $PARTITION JOIN "no"
+	        set_config $PARTITION JOIN "no"
 		if [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 			backup_image /mnt/itool/images/$HW/$PARTITION.img
 		fi
 	    ;;
 	    Win*)
-		JOIN=$( get_ldap $PARTITION JOIN )
+		JOIN=$( get_config $PARTITION JOIN )
 		Simple="off"; Domain="off"; Workgroup="off"; No="off";
 		case $JOIN in
 		    Simple)     Simple="on";;
@@ -444,16 +444,16 @@ get_info()
 			Domain    "Windows Domainenmitglied"               $Domain \
 			no	  "Keine Aufnahme"                         $No 2> /tmp/out
 	        JOIN=`cat /tmp/out`
-	        add_ldap $PARTITION JOIN $JOIN
+	        set_config $PARTITION JOIN $JOIN
 		sleep $SLEEP
 
 #		if [ "$JOIN" = "Domain" ]; then 
-#			ProductID=$( get_ldap $PARTITION ProductID )
+#			ProductID=$( get_config $PARTITION ProductID )
 #			dialog --colors --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 #				--title "\Zb\Z1Partition: $DESC" --nocancel \
 #				--inputbox "Geben Sie die Product-ID (Windows-Seriennummer) ein" 10 60 "$ProductID" 2> /tmp/out
 #			ProductID=`cat /tmp/out`
-#			add_ldap $PARTITION ProductID $ProductID
+#			set_config $PARTITION ProductID $ProductID
 #			sleep $SLEEP
 #		fi
 		if [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
@@ -461,7 +461,7 @@ get_info()
 		fi
 	    ;;
 	    Data)
-		FORMAT=$( get_ldap $PARTITION FORMAT )
+		FORMAT=$( get_config $PARTITION FORMAT )
 		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; clone="off"; no="off"; 
 		case $FORMAT in
 		    msdos)	msdos="on";;
@@ -485,7 +485,7 @@ get_info()
 			clone "1 zu 1 Kopie"                   $clone \
 			no    "Nicht formatieren" $no 2> /tmp/out
 	        FORMAT=`cat /tmp/out`
-	        add_ldap $PARTITION FORMAT $FORMAT
+	        set_config $PARTITION FORMAT $FORMAT
 		if [ FORMAT = "clone" -a  -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 			backup_image /mnt/itool/images/$HW/$PARTITION.img
 		fi
@@ -494,7 +494,7 @@ get_info()
 	esac
 	#Which tool we want to use
 	partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
-	TOOL=$( get_ldap $PARTITION ITOOL)
+	TOOL=$( get_config $PARTITION ITOOL)
 	case $TOOL in
 	    partclone)	partclone="on";;
 	    partimage)	partimage="on";;
@@ -511,7 +511,7 @@ get_info()
                 dd    	  "dd 1 zu 1 Kopie"   $dd \
                 dd_rescue "dd_rescue"         $dd_rescue  2> /tmp/out
 	TOOL=`cat /tmp/out`
-	add_ldap $PARTITION ITOOL $TOOL
+	set_config $PARTITION ITOOL $TOOL
         cp /tmp/out /mnt/itool/images/$HW/$PARTITION.tool
         sleep $SLEEP
 
@@ -550,12 +550,12 @@ clone()
     #Now we save the selected partitions
     for PARTITION in `cat /tmp/partitions`
     do
-	OS=$( get_ldap $PARTITION OS )
-	JOIN=$( get_ldap $PARTITION JOIN)
+	OS=$( get_config $PARTITION OS )
+	JOIN=$( get_config $PARTITION JOIN)
 	if [ "$OS" = "Data" ]; then
-	    FORMAT=$( get_ldap $PARTITION FORMAT)
+	    FORMAT=$( get_config $PARTITION FORMAT)
 	    if [ $FORMAT = 'clone' ]; then
-	        CTOOL=$( get_ldap $PARTITION ITOOL)
+	        CTOOL=$( get_config $PARTITION ITOOL)
 		saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
@@ -575,7 +575,7 @@ clone()
                fi 
                umount /mnt/$PARTITION
 	    fi
-	    CTOOL=$( get_ldap $PARTITION ITOOL)
+	    CTOOL=$( get_config $PARTITION ITOOL)
             saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    chmod 775 /mnt/itool/images/$HW/$PARTITION.img
 	fi
@@ -631,7 +631,7 @@ select_partitions_to_restore()
     echo -n "dialog --colors --backtitle \"OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     for PARTITION in `cat /tmp/partitions`
     do
-    	DESC=$( get_ldap $PARTITION DESC )
+    	DESC=$( get_config $PARTITION DESC )
 	echo -n "$PARTITION '$DESC' on " >> /tmp/command
     done
     echo -n " 2> /tmp/partitions"  >> /tmp/command
@@ -644,7 +644,7 @@ select_partitions_to_restore()
 
 make_autoconfig()
 {
-	OS=$( get_ldap $PARTITION OS)
+	OS=$( get_config $PARTITION OS)
 	mkdir -p /mnt/$PARTITION
 	case $OS in
 	    Win*)
@@ -655,8 +655,8 @@ make_autoconfig()
 		if [ -z "$MOUNTED" ]; then # We need the Presslufthammer!
 		    /usr/bin/ntfs-3g -o force,rw /dev/$PARTITION /mnt/$PARTITION
 		fi
-		JOIN=$( get_ldap $PARTITION JOIN)
-	        ProductID=$( get_ldap $PARTITION ProductID)
+		JOIN=$( get_config $PARTITION JOIN)
+	        ProductID=$( get_config $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
@@ -693,9 +693,9 @@ restore_partitions()
 {
      for PARTITION in `cat /tmp/partitions`
      do
-	OS=$( get_ldap $PARTITION OS)
+	OS=$( get_config $PARTITION OS)
 	if [ $OS = 'Data' ]; then 
-	    	FORMAT=$( get_ldap $PARTITION FORMAT)
+	    	FORMAT=$( get_config $PARTITION FORMAT)
 		case $FORMAT in
 			msdos|vfat|ntfs|ext2|ext3)
 		    		/sbin/mkfs.$FORMAT /dev/$PARTITION
@@ -760,9 +760,6 @@ echo "HW $HW"
 #Get my configuration description
 HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/description")
 echo "HWDESC $HWDESC"
-
-## Get the DN of the HW configuration
-HWDN=`ldapsearch -x -LLL configurationKey=$HW dn | sed 's/dn: //'| sed '/^$/d' | sed 's/^ //' | gawk '{ printf("%s",$1) }'`
 
 ## Get the list of the harddisks
 rm -rf /tmp/devs
