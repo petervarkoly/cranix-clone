@@ -39,12 +39,15 @@ make DESTDIR=%{buildroot} install
 
 %pre
 %service_add_pre xinetd.service
+%service_add_pre vsftpd.service
 
 %preun
 %service_del_preun xinetd.service
+%service_del_preun vsftpd.service
 
 %post
 %service_add_post xinetd.service
+%service_add_post vsftpd.service
 
 # setup rights
 if [ -d /home/groups ]
@@ -55,6 +58,7 @@ exit 0
 
 %postun
 %service_del_postun xinetd.service
+%service_del_postun vsftpd.service
 
 %files
 %defattr(-,root,root)
