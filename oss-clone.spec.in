@@ -36,7 +36,15 @@ Authors:
 %install
 make DESTDIR=%{buildroot} install
 
+
+%pre
+%service_add_pre xinetd.service
+
+%preun
+%service_del_preun xinetd.service
+
 %post
+%service_add_post xinetd.service
 
 # setup rights
 if [ -d /home/sysadmins/admin ]
@@ -68,6 +76,7 @@ fi
 exit 0
 
 %postun
+%service_del_postun xinetd.service
 
 %files
 %defattr(-,root,root)
@@ -92,6 +101,9 @@ exit 0
 /srv/tftp/bootmenu
 /srv/tftp/elilo.efi
 /srv/itool
+%dir /srv/ftp/itool/
+%dir /srv/ftp/itool/scripts
+/srv/ftp/itool/scripts/*
 /usr/share/oss/templates/*.in
 %defattr(-,root,root)
 /usr/sbin/*

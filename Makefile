@@ -41,13 +41,14 @@ install:
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
 	
 	mkdir -p $(DESTDIR)/etc/xinetd.d/
-	mkdir -p $(DESTDIR)/srv/itool/{scripts,config}
+	mkdir -p $(DESTDIR)/srv/itool/config
+	mkdir -p $(DESTDIR)/srv/ftp/itool/scripts
 	install -m 444 $(INSTUSER) config/xinetd.d.tftp.in $(DESTDIR)/etc/xinetd.d/tftp.in
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*bat             $(DESTDIR)/srv/itool/config
 	install -m 444 $(INSTUSER) config/*ps1             $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
-	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/itool/scripts
+	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/ftp/itool/scripts
 	
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
