@@ -30,8 +30,8 @@ then
         export SERVER="admin"
 fi
 
-wget -O /root/login    ftp://${SERVER}/itool/scripts/login 
-wget -O /root/clone.sh ftp://${SERVER}/itool/scripts/clone.sh 
+curl ftp://${SERVER}/itool/scripts/login > /root/login
+curl ftp://${SERVER}/itool/scripts/clone.sh > /root/clone.sh
 
 /bin/bash ${CDEBUG} -l /root/login
 
