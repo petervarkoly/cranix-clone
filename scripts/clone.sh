@@ -736,16 +736,12 @@ fi
 . /tmp/dhcp.ini
 . /tmp/credentials
 
-MAC=$( echo $DHCPCHADDR | gawk '{ print toupper($1) }' )
-MACN=$( echo $MAC | sed "s/:/-/g")
-
-echo "MAC      $MAC"
-echo "MACN     $MACN"
-echo "HOSTNAME $HOSTNAME"
-
 ## GET A SESSION TOKEN
-TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d 'username=admin&password=P3t3r0nly' 'https://admin/api/sessions/login' )
+TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" 'https://admin/api/sessions/login' )
 
+HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/dnsName' )
+
+echo "HOSTNAME $HOSTNAME"
 # Check if I'm Master
 MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/isMaster' )
 echo "MASTER $MASTER"
@@ -826,7 +822,7 @@ USERNAME=`cat /tmp/username`
 while :
 do
 
-	if [ "$MASTER" ] ;then
+	if [ "$MASTER" = "true" ] ;then
 		dialog  --colors --help-button --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Bitte waehlen Sie den gewuenschten Modus" 20 70 12 \
@@ -916,7 +912,7 @@ do
                 	## Menu Item About ##
 			dialog --colors  --backtitle "OpenSchoolServer-CloneTool - ${IVERSION} ${HWDESC}" \
 				--title "\Zb\Z1About" \
-				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Netzwerkkarte : ${NIC} : ${MAC}\n Festplatte(n): $HDs" 17 60
+				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Festplatte(n): $HDs" 17 60
 		;;
 	esac
 

@@ -29,39 +29,10 @@ then
         export SERVER="admin"
 fi
 
-## if no nic was defined set it to eth0
-if [ -z "${NIC}" ]
-then
-        for i in $( hwinfo --netcard | grep "Device File:"  | gawk -F": " '{ print $2 }' )
-        do
-                /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $i
-                if [ -e /tmp/dhcp.ini ]
-                then
-                        export NIC=$i
-                        break
-                fi
-        done
-else
-        /usr/lib/wicked/bin/wickedd-dhcp4 --test --test-output /tmp/dhcp.ini $NIC
-fi
-
-. /tmp/dhcp.ini
-IPADDR=${IPADDR/\/*/}
-
-#TODO EVALUATE HOSTNAME 
-
-if [ -z "${DHCPCHADDR}" ]
-then
-        DHCPCHADDR=$( cat /sys/class/net/${NIC}/address )
-        echo "DHCPCHADDR='${DHCPCHADDR}'" >> /tmp/dhcp.ini
-fi
-
 if [ -z "${SLEEP}" ]
 then
         export SLEEP=1
 fi
-
-export HOSTNAME=${HOSTNAME%%.*}
 
 loadkeys de-latin1
 
@@ -73,7 +44,7 @@ then
     echo "register" > /tmp/userpassword
     chmod 400 /tmp/userpassword
     chmod 400 /tmp/credentials
-    echo "mount -t cifs -o username="register",password="register",netbiosname=${HOSTNAME} //$SERVER/itool /mnt/itool" > /tmp/login
+    echo "mount -t cifs -o username="register",password="register" //$SERVER/itool /mnt/itool" > /tmp/login
     mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
     sleep $SLEEP
     if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
