@@ -1,15 +1,15 @@
 ###############################################################################
 # Script:       clone.sh
-# Copyright (c) 2010 Peter Varkoly, Fuerth, Germany.
+# Copyright (c) 2017 Peter Varkoly, Nuremberg, Germany.
 # All rights reserved.
 #
 # Authos:               Peter Varkoly
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="3.5"
+                                IVERSION="4.0"
 
-                                IBUILD="09.10.2015"
+                                IBUILD="23.09.2017"
 #
 ###############################################################################
 
