@@ -5,6 +5,9 @@ mkdir -p /mnt/itool
 umount /mnt/itool > /dev/null 2>&1
 rm -Rf /tmp/* > /dev/null 2>&1
 
+chmod 700 /root/.ssh/
+chmod 600 /root/.ssh/authorized_keys
+
 WARNING='Anmeldung am System war nicht moeglich!\n\n
 Dies koennte mehrere Gruende haben.\n\n
  - Falscher Benutzername\n
@@ -113,16 +116,24 @@ else
 			ON="off"
 		   done
 		   dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
-		   DEVICE=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
-		   MAC=$(cat /sys/class/net/$DEVICE/address )
 		   ROOM=$(cat /tmp/clone.input)
+
+		   #Get the active device name
+		   ETH=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
+		   MAC=$(cat /sys/class/net/$ETH/address )
+
+		   #Get the list of the available devices in the room
+		   DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/rooms/$ROOM/availableIPAddresses" )
+		   dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
+		   DEVICE=$(cat /tmp/clone.input)
+
 		   #Lets register the device
-		   RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/rooms/$ROOM/device/$MAC/nextFreeName" )
+		   RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$ROOM/$MAC/$DEVICE" )
 		   curl --insecure -X DELETE --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/sessions/$TOKEN"
 		   sleep 3
-	           ifdown $DEVICE
+	           ifdown $ETH
 		   sleep 1
-		   ifup   $DEVICE
+		   ifup   $ETH
 	           TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" 'https://admin/api/sessions/login' )
 		   HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/dnsName' )
 		   if [ -z "$HOSTNAME" ]
@@ -130,7 +141,7 @@ else
 		       dialog --backtitle "CloneTool 4.0" --title "Registration fehlgeschlagen." --msgbox "Die Regsitrierung des Rechners ist Fehlgeschlagen.\nÜber die Adminoberfläche widerholen!" 17 60
 		       exit 0
 		   fi
-    		   dialog --backtitle "${STARTCMD}" --title "Master" --yesno "Ist dieser Rechner ein Klone-Master?" 6 50
+    		   dialog --backtitle "${STARTCMD}" --title "Master" --defaultno --yesno "Ist dieser Rechner ein Klone-Master?" 6 50
     		   if [ $? = 0 ]
     		   then
 		       curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/devices/setMaster/1"
