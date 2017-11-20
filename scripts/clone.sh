@@ -372,7 +372,7 @@ set_config()
 get_info()
 {
     # Get the description of the partitions
-    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC}\" --title \"Beschreibung der Partitionen\" " >  /tmp/getdescriptions
+    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME\" --title \"Beschreibung der Partitionen\" " >  /tmp/getdescriptions
     echo -n "--form \"Geben Sie eine kurze Beschreibung fuer die Partitionen\" 20 60 10 " 			>> /tmp/getdescriptions 
     let j=1
     for i in `cat /tmp/partitions`
@@ -408,7 +408,7 @@ get_info()
 	    Data) Data="on";;
 	esac    
 
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 		--title "\Zb\Z1Partition: $DESC" --nocancel \
 		--radiolist "Waehlen Sie das Betriebsystem:" 18 60 8 \
 		Win10    "Windows 10"           $Win10 \
@@ -437,7 +437,7 @@ get_info()
 		    Workgroup)  Workgroup="on";;
 		    no)         No="on";;
 		esac
-		dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+		dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
 			--radiolist "Windows Anmeldung:" 11 60 4 \
 			Simple    "Windows Domainenmitglied ohne Sysprep"  $Simple \
@@ -473,7 +473,7 @@ get_info()
 		    clone)	clone="on";;
 		    no)         no="on";;
 		esac
-	        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+	        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
 	        	--radiolist "Formatierung der Datenpartition" 16 60 9 \
 			msdos "Formatieren: Windows FAT 16"    $msdos \
@@ -503,7 +503,7 @@ get_info()
 	    *)
 		partclone="on";;
 	esac
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
                 --title "\Zb\Z1Partition: $DESC" --nocancel \
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
                 partclone "Partclone"         $partclone \
@@ -529,7 +529,7 @@ clone()
 
     if [ ! -d /mnt/itool/images/$HW/$PARTITION-Unattended/ ]
     then
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" --title "\Zb\Z1Error" --msgbox "Der angemeldete Benutzer hat keine Rechte in /srv/itool/images." 10 70
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" --title "\Zb\Z1Error" --msgbox "Der angemeldete Benutzer hat keine Rechte in /srv/itool/images." 10 70
 	return
     fi
 
@@ -628,7 +628,7 @@ select_partitions_to_restore()
     get_cloned_partitions
 
     # This funcitons get the list of the avaiable partitions
-    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
+    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     for PARTITION in `cat /tmp/partitions`
     do
     	DESC=$( get_config $PARTITION DESC )
@@ -710,7 +710,7 @@ restore_partitions()
 	elif [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 		restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img
 	else
-		dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+		dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
 			--msgbox "Die Imagedatei existiert nicht:\n //${SERVER}/itool/images/$HW/$PARTITION.img" 17 60
 	fi
@@ -820,7 +820,7 @@ while :
 do
 
 	if [ "$MASTER" = "true" ] ;then
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Restore"    "Computer wiederherstellen" \
@@ -832,7 +832,7 @@ do
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
 	elif [ -z "$HW" ]; then
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Manual"     "Manuelles Backup/Restore einer Partition" \
@@ -840,7 +840,7 @@ do
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
 	else
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Restore"    "Computer wiederherstellen" \
@@ -891,7 +891,7 @@ do
 		;;
 		Quit)
 			## Menu Item Quit ##
-			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 				--title     "\Zb\Z1Beenden" \
 				--ok-label  "Neu starten" \
 				--cancel-label "Abbrechen" \
@@ -907,9 +907,9 @@ do
 		;;
 		About)
                 	## Menu Item About ##
-			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
+			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 				--title "\Zb\Z1About" \
-				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Festplatte(n): $HDs" 17 60
+				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Festplatte(n): $HDs\n MAC-Adresse: ${MAC}" 17 60
 		;;
 	esac
 

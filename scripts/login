@@ -118,17 +118,17 @@ else
 		   dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
 		   ROOM=$(cat /tmp/clone.input)
 
-		   #Get the active device name
-		   ETH=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
-		   MAC=$(cat /sys/class/net/$ETH/address )
-
 		   #Get the list of the available devices in the room
 		   DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/rooms/$ROOM/availableIPAddresses" )
 		   dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
 		   DEVICE=$(cat /tmp/clone.input)
 
+		   #Get the active device name
+		   ETH=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
+		   export MAC=$(cat /sys/class/net/$ETH/address )
+
 		   #Lets register the device
-		   RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$ROOM/$MAC/$DEVICE" )
+		   RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/rooms/$ROOM/$MAC/$DEVICE" )
 		   curl --insecure -X DELETE --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/sessions/$TOKEN"
 		   sleep 3
 	           ifdown $ETH
