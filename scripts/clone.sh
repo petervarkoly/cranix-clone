@@ -569,7 +569,7 @@ clone()
                cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
                cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-               sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+               sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
                if [ "$JOIN" = "no" ]; then
                      sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
                fi 
@@ -661,7 +661,7 @@ make_autoconfig()
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    sed -i "s/WORKGROUP/$WORKGROUP/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/DOMAIN/$DOMAIN/"            /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		fi
 		if [ -e /mnt/$PARTITION/script/ ]; then
                     rm -r /mnt/$PARTITION/script/
@@ -670,7 +670,7 @@ make_autoconfig()
 		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/WORKGROUP/${WORKGROUP}/    /mnt/$PARTITION/script/domainjoin.ps1
+		sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
 		if [ "$JOIN" = "no" ]; then
                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
                 fi
@@ -681,6 +681,9 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
+        if [ -i /mnt/$PARTITION/salt/conf/minion ]; then
+	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" /mnt/$PARTITION/salt/conf/minion
+	fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
@@ -761,7 +764,7 @@ HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
 ## Get the DOMAIN
 DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/domainName' )
-echo "WORKGROUP $WORKGROUP"
+echo "DOMAIN $DOMAIN"
 
 ## Analysing partitions
 rm -rf /tmp/parts

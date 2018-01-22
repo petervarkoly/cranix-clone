@@ -3,7 +3,7 @@ param (
 )
 
 $newName  = "HOSTNAME".ToLower()  # HOSTNAME  --> edv-pc00
-$domain   = "WORKGROUP".ToLower() # WORKGROUP --> DomainName
+$domain   = "DOMAIN".ToLower() # DOMAIN --> DomainName
 $user     = "register"
 $username = "$domain\$user" 
 $currentName     = $(Get-WmiObject Win32_Computersystem).name.ToLower()
