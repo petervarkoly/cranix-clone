@@ -566,7 +566,8 @@ clone()
                      rm -r /mnt/$PARTITION/script/
                fi
                mkdir -p /mnt/$PARTITION/script/
-               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+               mkdir -p /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup
+               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
                cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
@@ -667,12 +668,13 @@ make_autoconfig()
                     rm -r /mnt/$PARTITION/script/
                 fi
 		mkdir -p /mnt/$PARTITION/script/
-		cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
+                mkdir -p /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup
+                cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
 		if [ "$JOIN" = "no" ]; then
-                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
                 fi
 	    ;;
 	    Linux|Data)
@@ -681,8 +683,11 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-        if [ -i /mnt/$PARTITION/salt/conf/minion ]; then
+        if [ -e /mnt/$PARTITION/salt/conf/minion ]; then
 	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" /mnt/$PARTITION/salt/conf/minion
+	    rm -f /mnt/$PARTITION/salt/conf/pki/minion/*
+	    #Reset the minions ssh on the server
+	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
 	fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
