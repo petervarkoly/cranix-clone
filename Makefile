@@ -6,7 +6,7 @@ PACKAGE         = oss-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
-OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:openleap-42-3/
+OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/
 
 install:
 	#configure tftp boot template service
