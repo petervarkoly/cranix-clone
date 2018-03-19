@@ -572,7 +572,7 @@ clone()
                sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
                if [ "$JOIN" = "no" ]; then
-                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
+                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
                fi 
                umount /mnt/$PARTITION
 	    fi
