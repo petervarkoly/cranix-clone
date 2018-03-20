@@ -566,8 +566,7 @@ clone()
                      rm -r /mnt/$PARTITION/script/
                fi
                mkdir -p /mnt/$PARTITION/script/
-               mkdir -p /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup
-               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
+               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
                cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
                sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
@@ -662,19 +661,18 @@ make_autoconfig()
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    sed -i "s/DOMAIN/$DOMAIN/"            /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/DOMAIN/${DOMAIN}/"            /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		fi
 		if [ -e /mnt/$PARTITION/script/ ]; then
                     rm -r /mnt/$PARTITION/script/
                 fi
 		mkdir -p /mnt/$PARTITION/script/
-                mkdir -p /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup
-                cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
+                cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
 		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
 		sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
 		if [ "$JOIN" = "no" ]; then
-                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/Windows/System32/GroupPolicy/Machine/Scripts/Startup/domainjoin.bat
+                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
                 fi
 	    ;;
 	    Linux|Data)
