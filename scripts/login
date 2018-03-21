@@ -52,6 +52,11 @@ then
     sleep $SLEEP
     if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
     then
+        . /tmp/credentials
+        TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" 'https://admin/api/sessions/login' )
+        HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/dnsName' )
+        echo "TOKEN=$TOKEN"       >  /tmp/apiparams
+        echo "HOSTNAME=$HOSTNAME" >> /tmp/apiparams
         bash ${CDEBUG} /root/${STARTCMD}.sh
         exit 0
     else
