@@ -61,7 +61,10 @@ util-linux:
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 e mkdir -p -m 700 root/.ssh/
+e mkdir -p -m 755 usr/share/YaST2/clients/ 
 x bin/*                     bin/
 x root/*                    root/
 x etc/ssh/sshd_config       etc/ssh/sshd_config
 x root/.ssh/authorized_keys root/.ssh/authorized_keys
+x clients/inst_oss-check-update.rb usr/share/YaST2/clients/inst_oss-check-update.rb
+ 
