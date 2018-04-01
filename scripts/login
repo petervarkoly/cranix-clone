@@ -41,13 +41,13 @@ loadkeys de-latin1
 
 if [ "$MODUS" = "AUTO" ]
 then
-    echo "username=register" >  /tmp/credentials
-    echo "password=register" >> /tmp/credentials 
-    echo "register" > /tmp/username
-    echo "register" > /tmp/userpassword
+    echo "username=ossreader" >  /tmp/credentials
+    echo "password=ossreader" >> /tmp/credentials 
+    echo "ossreader" > /tmp/username
+    echo "ossreader" > /tmp/userpassword
     chmod 400 /tmp/userpassword
     chmod 400 /tmp/credentials
-    echo "mount -t cifs -o username="register",password="register" //$SERVER/itool /mnt/itool" > /tmp/login
+    echo "mount -t cifs -o username="ossreader",password="ossreader" //$SERVER/itool /mnt/itool" > /tmp/login
     mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
     sleep $SLEEP
     if [ $? -eq 0 ] && [ -d /mnt/itool/config/ ] && [ -d /mnt/itool/images/ ]
