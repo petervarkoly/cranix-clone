@@ -430,17 +430,14 @@ get_info()
 	    ;;
 	    Win*)
 		JOIN=$( get_config $PARTITION JOIN )
-		Simple="off"; Domain="off"; Workgroup="off"; No="off";
+		Domain="off"; Workgroup="off"; No="off";
 		case $JOIN in
-		    Simple)     Simple="on";;
 		    Domain)     Domain="on";;
-		    Workgroup)  Workgroup="on";;
 		    no)         No="on";;
 		esac
 		dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
 			--radiolist "Windows Anmeldung:" 11 60 4 \
-			Simple    "Windows Domainenmitglied ohne Sysprep"  $Simple \
 			Domain    "Windows Domainenmitglied"               $Domain \
 			no	  "Keine Aufnahme"                         $No 2> /tmp/out
 	        JOIN=`cat /tmp/out`
