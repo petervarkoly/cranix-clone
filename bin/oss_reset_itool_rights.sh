@@ -1,11 +1,9 @@
-#!/bin/bash
-sysadmins_gn=`wbinfo -n sysadmins | awk '{print "wbinfo -S "$1}'| bash`
-workstations_gn=`wbinfo -n workstations | awk '{print "wbinfo -S "$1}'| bash`
+#!/bin/bash 
+sysadmins_gn=$( oss_get_gidNumber.sh sysadmins )
 chmod     755      /srv/itool
 chgrp -R $sysadmins_gn /srv/itool
 chmod    2755      /srv/itool/config
 chmod    2775      /srv/itool/hwinfo
-setfacl -m g:$workstations_gn:rwx  /srv/itool/hwinfo
 chmod -R 2775      /srv/itool/images
 setfacl -m g:$sysadmins_gn:rwx  /srv/itool/images
 chmod -R 755       /srv/itool/ROOT
