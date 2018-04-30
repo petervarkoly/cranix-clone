@@ -800,13 +800,21 @@ if [ "$MODUS" = "AUTO" ]; then
         mbr
         restart
     fi
-    IFS=","
-    for i in $PARTITIONS
-    do
-	[ "$i" = "MBR" ] && continue
-    	echo $i >> /tmp/partitions
-    done
-    unset IFS
+    if [ "$PARTITIONS" = "all" ]; then
+       PARTITIONS=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/partitions")
+       for i in $PARTITIONS
+       do
+           echo $i >> /tmp/partitions
+       done
+    else
+       IFS=","
+       for i in $PARTITIONS
+       do
+           [ "$i" = "MBR" ] && continue
+           echo $i >> /tmp/partitions
+       done
+       unset IFS
+    fi
     initialize_disks
     restore_partitions
     restart
