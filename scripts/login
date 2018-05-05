@@ -58,6 +58,7 @@ then
         echo "TOKEN=$TOKEN"       >  /tmp/apiparams
         echo "HOSTNAME=$HOSTNAME" >> /tmp/apiparams
         bash ${CDEBUG} /root/${STARTCMD}.sh
+	curl --insecure -X DELETE --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/sessions/$TOKEN"
         exit 0
     else
     	dialog  --backtitle "${STARTCMD}" --title "Anmeldung" --yesno "$WARNING" 15 60
@@ -155,6 +156,7 @@ else
 	        echo "TOKEN=$TOKEN"       >  /tmp/apiparams
 		echo "HOSTNAME=$HOSTNAME" >> /tmp/apiparams 
     		/bin/bash ${CDEBUG} /root/${STARTCMD}.sh
+		curl --insecure -X DELETE --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/sessions/$TOKEN"
     		exit 0
     	    else
     		sleep $SLEEP
