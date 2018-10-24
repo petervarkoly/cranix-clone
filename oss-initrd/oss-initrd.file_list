@@ -6,6 +6,7 @@
 coreutils:
     /usr/bin/base64
     /usr/bin/basename
+    /usr/bin/chroot
     /usr/bin/cp
     /usr/bin/date
     /usr/bin/dd
