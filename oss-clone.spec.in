@@ -1,15 +1,14 @@
 #
 # Spec file for oss-clone (@VERSION@)
-# Copyright (c) 2014 Peter Varkoly <peter@varkoly.de> Nürnberg, Germany.  All rights reserved.
+# Copyright (c) 2018 Peter Varkoly <peter@varkoly.de> Nürnberg, Germany.  All rights reserved.
 #
 
 Name:		oss-clone
 Summary:	OSS boot environment for cloning clients
 Version:	@VERSION@
 Release:	@RELEASE@
-License:	Commercial
-Vendor:		EXTIS GmbH, Uttenreuth, Germany
-Distribution:	SLE11
+License:	GPL-3.0+
+Vendor:		Dipl. Ing. Peter Varkoly, Germany
 Packager:	peter@varkoly.de
 Group:		Productivity/
 Source:		%{name}.tar.bz2

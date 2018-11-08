@@ -6,7 +6,8 @@ PACKAGE         = oss-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
-OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/ /home/OSC/home:varkoly:OSS-4-0:stable/
+#OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/ /home/OSC/home:varkoly:OSS-4-0:stable/
+OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:stable/
 
 install:
 	#configure tftp boot template service
@@ -31,9 +32,13 @@ install:
 	install -m 444 $(INSTUSER)  tftp/elilo*                   $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
 
-	#Install the kernel and initrd from installation-images-OSS	
-	install -m 444 $(INSTUSER)  /SuSE/OSS/CD1/boot/x86_64/loader/initrd  $(DESTDIR)/srv/tftp/clone/
-	install -m 444 $(INSTUSER)  /CD1/boot/x86_64/loader/linux            $(DESTDIR)/srv/tftp/clone/
+	#Install the kernel and initrd from installation-images-OSS or from the local provided clone directory
+	if [ -d clone ];  then \
+		cp clone/* $(DESTDIR)/srv/tftp/clone/; \
+	else \
+		install -m 444 $(INSTUSER)  /SuSE/OSS/CD1/boot/x86_64/loader/initrd  $(DESTDIR)/srv/tftp/clone/; \
+		install -m 444 $(INSTUSER)  /CD1/boot/x86_64/loader/linux            $(DESTDIR)/srv/tftp/clone/; \
+	fi
 	#configure itool service
 	mkdir -p -m 2750 $(DESTDIR)/srv/itool/config
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/images/manual
@@ -70,6 +75,7 @@ dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi
 	mkdir $(PACKAGE)
 	cp -rp Makefile bin config scripts tftp $(PACKAGE)
+	if [ -d clone ]; then cp -rp clone $(PACKAGE) ; fi
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	sed "s/@VERSION@/$(VERSION)/" $(PACKAGE).spec.in > $(PACKAGE).spec
 	sed -i "s/@RELEASE@/$(NRELEASE)/"  $(PACKAGE).spec
