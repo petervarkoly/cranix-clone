@@ -658,19 +658,8 @@ make_autoconfig()
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    sed -i "s/DOMAIN/${DOMAIN}/"            /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/DOMAIN/${DOMAIN}/"          /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		fi
-		if [ -e /mnt/$PARTITION/script/ ]; then
-                    rm -r /mnt/$PARTITION/script/
-                fi
-		mkdir -p /mnt/$PARTITION/script/
-                cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
-		cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-		sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
-		if [ "$JOIN" = "no" ]; then
-                    sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-                fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
@@ -678,12 +667,19 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-        if [ -e /mnt/$PARTITION/salt/conf/minion ]; then
-	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" /mnt/$PARTITION/salt/conf/minion
-	    rm -f /mnt/$PARTITION/salt/conf/pki/minion/*
-	    #Reset the minions ssh on the server
-	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
-	fi
+        #Reset the minions ssh on the server
+        curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
+	#Reset the minion configuration on the client
+        [ -d /mnt/$PARTITION/salt/conf ] && SALTCONF=/mnt/$PARTITION/salt/conf
+        [ -d /mnt/$PARTITION/etc/salt ] && SALTCONF=/mnt/$PARTITION/etc/salt
+        if [ -n "$SALTCONF" ]; then
+            if grep -q ^id: $SALTCONF/minion; then
+                sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" $SALTCONF/minion
+            else
+                echo "id: ${HOSTNAME}.${DOMAIN}" >>$SALTCONF/minion
+            fi
+            rm -f $SALTCONF/minion_id $SALTCONF/pki/minion/*
+        fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
