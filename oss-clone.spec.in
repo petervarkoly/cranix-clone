@@ -57,9 +57,11 @@ exit 0
 
 %files
 %defattr(-,root,root)
+%dir /etc/xinetd.d/
+%dir /srv/tftp
+%dir /srv/ftp
 %config /etc/xinetd.d/*
 %config(noreplace) /srv/tftp/clouds.jpg
-%dir /srv/tftp
 /srv/tftp/bootlogo
 %dir /srv/tftp/clone
 /srv/tftp/clone/*
