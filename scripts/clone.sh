@@ -102,7 +102,7 @@ saveimage ()
 
 #########################
 # The image restore cmd
-# restore $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] 
+# restore $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ]
 ########################
 restore ()
 {
@@ -129,14 +129,14 @@ restore ()
                 ;;
                 dd)
 			if [ "$MULTICAST" ]; then
-                        	udp-receiver --nokbd 2> /dev/null | gunzip | dd of=$1 bs=65536
+                       udp-receiver --nokbd 2> /dev/null | gunzip | dd of=$1 bs=65536
 			else
 				echo "#################################################"
 				echo "# Das Zurückspielen des Images wurde gestartet. #"
 				echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 				echo "# Warten bis das Hauptmenü wieder kommt!  #"
 				echo "#################################################"
-                        	cat $2 | gunzip | dd of=$1 bs=65536
+                       cat $2 | gunzip | dd of=$1 bs=65536
 			fi
                 ;;
                 dd_rescue)
@@ -219,9 +219,9 @@ man_part()
         return
    fi
    PARTITION=$(cat /tmp/itool.input)
-   for HD in $HDs 
+   for HD in $HDs
    do
-   	if [  grep $HD /tmp/itool.input ]; then
+  if [  grep $HD /tmp/itool.input ]; then
 		break;
 	fi
    done
@@ -299,7 +299,7 @@ man_part()
 		if [ $MBR = "yes" ]; then
 			dd if=/mnt/itool/images/manual/$NAME.parting of=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 		fi
-	fi 
+	fi
         dialog --colors --backtitle "CloneTool - ${IVERSION}" --title "\Zb\Z1Manuelles Backup einer Partition" \
                --infobox "Partimage wird gestartet. Bitte warten!" 10 60
 	restore $PARTITION /mnt/itool/images/manual/$NAME.img
@@ -341,14 +341,14 @@ select_partitions()
 
 save_hw_info()
 {
-    if [ ! -e /mnt/itool/hwinfo/$HOSTNAME ]; then 
-	mkdir -p /mnt/itool/hwinfo/$HOSTNAME
+    if [ ! -e /mnt/itool/hwinfo/${HOSTNAME} ]; then
+	mkdir -p /mnt/itool/hwinfo/${HOSTNAME}
 	let i=100
         hw_items="bios cdrom chipcard cpu disk gfxcard keyboard memory monitor mouse netcard printer sound storage-ctrl"
         for hwitem in $hw_items
         do
 	    echo $(($i/14)) | dialog --colors --sleep 1 --backtitle "CloneTool - ${IVERSION} ${HWDESC}" --title "\Zb\Z1Status" --gauge "Hardwarekonfiguration wird gespeichert: $hwitem"  10 60
-            hwinfo --$hwitem > /mnt/itool/hwinfo/$HOSTNAME/$hwitem
+            hwinfo --$hwitem > /mnt/itool/hwinfo/${HOSTNAME}/$hwitem
 	    i=$((i+100))
         done
     fi
@@ -358,7 +358,7 @@ save_hw_info()
 # get_config Partition Variable
 get_config()
 {
-    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2" 
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2"
 }
 
 # Add the necessary configuration values to server
@@ -372,8 +372,8 @@ set_config()
 get_info()
 {
     # Get the description of the partitions
-    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME\" --title \"Beschreibung der Partitionen\" " >  /tmp/getdescriptions
-    echo -n "--form \"Geben Sie eine kurze Beschreibung fuer die Partitionen\" 20 60 10 " 			>> /tmp/getdescriptions 
+    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}\" --title \"Beschreibung der Partitionen\" " >  /tmp/getdescriptions
+    echo -n "--form \"Geben Sie eine kurze Beschreibung fuer die Partitionen\" 20 60 10 "		>> /tmp/getdescriptions
     let j=1
     for i in `cat /tmp/partitions`
     do
@@ -406,9 +406,9 @@ get_info()
 	    Win8)  Win8="on";;
 	    Linux) Linux="on";;
 	    Data) Data="on";;
-	esac    
+	esac
 
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 		--title "\Zb\Z1Partition: $DESC" --nocancel \
 		--radiolist "Waehlen Sie das Betriebsystem:" 18 60 8 \
 		Win10    "Windows 10"           $Win10 \
@@ -420,7 +420,7 @@ get_info()
 	OS=`cat /tmp/out`
 	set_config $PARTITION OS $OS
         sleep $SLEEP
-	
+
 	case $OS in
 	    WinBoot)
 	        set_config $PARTITION JOIN "no"
@@ -435,7 +435,7 @@ get_info()
 		    Domain)     Domain="on";;
 		    no)         No="on";;
 		esac
-		dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+		dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
 			--radiolist "Windows Anmeldung:" 11 60 4 \
 			Domain    "Windows Domainenmitglied"               $Domain \
@@ -444,7 +444,7 @@ get_info()
 	        set_config $PARTITION JOIN $JOIN
 		sleep $SLEEP
 
-#		if [ "$JOIN" = "Domain" ]; then 
+#		if [ "$JOIN" = "Domain" ]; then
 #			ProductID=$( get_config $PARTITION ProductID )
 #			dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC}" \
 #				--title "\Zb\Z1Partition: $DESC" --nocancel \
@@ -459,7 +459,7 @@ get_info()
 	    ;;
 	    Data)
 		FORMAT=$( get_config $PARTITION FORMAT )
-		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; clone="off"; no="off"; 
+		msdos="off"; vfat="off"; ntfs="off"; ext2="off"; ext3="off"; swap="off"; clone="off"; no="off";
 		case $FORMAT in
 		    msdos)	msdos="on";;
 		    vfat)	vfat="on";;
@@ -470,9 +470,9 @@ get_info()
 		    clone)	clone="on";;
 		    no)         no="on";;
 		esac
-	        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+	        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--title "\Zb\Z1Partition: $DESC" --nocancel \
-	        	--radiolist "Formatierung der Datenpartition" 16 60 9 \
+	       --radiolist "Formatierung der Datenpartition" 16 60 9 \
 			msdos "Formatieren: Windows FAT 16"    $msdos \
 			vfat  "Formatieren: Windows FAT 32"    $vfat  \
 			ntfs  "Formatieren: Windows NTFS"      $ntfs \
@@ -500,12 +500,12 @@ get_info()
 	    *)
 		partclone="on";;
 	esac
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
                 --title "\Zb\Z1Partition: $DESC" --nocancel \
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
                 partclone "Partclone"         $partclone \
                 partimage "Partimage"         $partimage \
-                dd    	  "dd 1 zu 1 Kopie"   $dd \
+                dd     "dd 1 zu 1 Kopie"   $dd \
                 dd_rescue "dd_rescue"         $dd_rescue  2> /tmp/out
 	TOOL=`cat /tmp/out`
 	set_config $PARTITION ITOOL $TOOL
@@ -520,17 +520,17 @@ get_info()
 }
 
 clone()
-{    
+{
     #Save the master boot record and the partition settings of the drivers
     mkdir -p /mnt/itool/images/$HW/$PARTITION-Unattended/
 
     if [ ! -d /mnt/itool/images/$HW/$PARTITION-Unattended/ ]
     then
-        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" --title "\Zb\Z1Error" --msgbox "Der angemeldete Benutzer hat keine Rechte in /srv/itool/images." 10 70
+        dialog --colors --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" --title "\Zb\Z1Error" --msgbox "Der angemeldete Benutzer hat keine Rechte in /srv/itool/images." 10 70
 	return
     fi
 
-    for HD in $HDs 
+    for HD in $HDs
     do
         dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
 	PTTYPE=$(  parted -m -s /dev/$HD print | gawk -F : 'NR==2 { print  $6 }' )
@@ -541,7 +541,7 @@ clone()
 	    *)
 	      sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
 	      ;;
-	esac    
+	esac
     done
 
     #Now we save the selected partitions
@@ -569,7 +569,7 @@ clone()
                sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
                if [ "$JOIN" = "no" ]; then
                      sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-               fi 
+               fi
                umount /mnt/$PARTITION
 	    fi
 	    CTOOL=$( get_config $PARTITION ITOOL)
@@ -593,7 +593,7 @@ get_cloned_partitions()
 
 mbr()
 {
-    for HD in $HDs 
+    for HD in $HDs
     do
         dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
     done
@@ -601,7 +601,7 @@ mbr()
 
 initialize_disks()
 {
-    for HD in $HDs 
+    for HD in $HDs
     do
         echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512"
         dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512
@@ -625,10 +625,10 @@ select_partitions_to_restore()
     get_cloned_partitions
 
     # This funcitons get the list of the avaiable partitions
-    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
+    echo -n "dialog --colors --backtitle \"CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}\" --title \"Zur Verfuegung stehende Partitionen\" --checklist \"Waehlen Sie die zu bearbeitende Partitionen\" 18 60 8 " > /tmp/command
     for PARTITION in `cat /tmp/partitions`
     do
-    	DESC=$( get_config $PARTITION DESC )
+   DESC=$( get_config $PARTITION DESC )
 	echo -n "$PARTITION '$DESC' on " >> /tmp/command
     done
     echo -n " 2> /tmp/partitions"  >> /tmp/command
@@ -656,10 +656,13 @@ make_autoconfig()
 	        ProductID=$( get_config $PARTITION ProductID)
 		if [ -e /mnt/itool/config/${OS}${JOIN}.xml ]; then
 		    cp /mnt/itool/config/${OS}${JOIN}.xml /mnt/$PARTITION/Windows/Panther/Unattend.xml
-		    sed -i "s/HOSTNAME/$HOSTNAME/"        /mnt/$PARTITION/Windows/Panther/Unattend.xml
+		    sed -i "s/HOSTNAME/${HOSTNAME}/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/DOMAIN/${DOMAIN}/"          /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		fi
+		if [ -e /mnt/$PARTITION/script/ ]; then
+                    rm -r /mnt/$PARTITION/script/
+                fi
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
@@ -667,19 +670,12 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-        #Reset the minions ssh on the server
-        curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
-	#Reset the minion configuration on the client
-        [ -d /mnt/$PARTITION/salt/conf ] && SALTCONF=/mnt/$PARTITION/salt/conf
-        [ -d /mnt/$PARTITION/etc/salt ] && SALTCONF=/mnt/$PARTITION/etc/salt
-        if [ -n "$SALTCONF" ]; then
-            if grep -q ^id: $SALTCONF/minion; then
-                sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" $SALTCONF/minion
-            else
-                echo "id: ${HOSTNAME}.${DOMAIN}" >>$SALTCONF/minion
-            fi
-            rm -f $SALTCONF/minion_id $SALTCONF/pki/minion/*
-        fi
+        if [ -e /mnt/$PARTITION/salt/conf/minion ]; then
+	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" /mnt/$PARTITION/salt/conf/minion
+	    rm -f /mnt/$PARTITION/salt/conf/pki/minion/*
+	    #Reset the minions ssh on the server
+	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
+	fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
@@ -693,11 +689,11 @@ restore_partitions()
      for PARTITION in `cat /tmp/partitions`
      do
 	OS=$( get_config $PARTITION OS)
-	if [ $OS = 'Data' ]; then 
-	    	FORMAT=$( get_config $PARTITION FORMAT)
+	if [ $OS = 'Data' ]; then
+	   FORMAT=$( get_config $PARTITION FORMAT)
 		case $FORMAT in
 			msdos|vfat|ntfs|ext2|ext3)
-		    		/sbin/mkfs.$FORMAT /dev/$PARTITION
+				/sbin/mkfs.$FORMAT /dev/$PARTITION
 			;;
 			swap)
 				/sbin/mkswap /dev/$PARTITION
@@ -709,7 +705,7 @@ restore_partitions()
 	elif [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
 		restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img
 	else
-		dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+		dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
 			--msgbox "Die Imagedatei existiert nicht:\n //${SERVER}/itool/images/$HW/$PARTITION.img" 17 60
 	fi
@@ -737,13 +733,13 @@ fi
 
 mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
 
-echo "HOSTNAME $HOSTNAME"
+echo "HOSTNAME ${HOSTNAME}"
 # Check if I'm Master
-MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/isMaster' )
+MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' 'https://admin/api/clonetool/isMaster' )
 echo "MASTER $MASTER"
 
 # Get my conf value if not defined by the kernel parameter
-if  [ -z "$HW" ]; then           
+if  [ -z "$HW" ]; then
     HW=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/hwconf' )
 fi
 
@@ -759,7 +755,7 @@ mkdir -p /tmp/devs
 HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
 ## Get the DOMAIN
-DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/sessions/domainName' )
+DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' 'https://admin/api/clonetool/domainName' )
 echo "DOMAIN $DOMAIN"
 
 ## Analysing partitions
@@ -786,7 +782,7 @@ echo "SLEEP $SLEEP"
 sleep $SLEEP
 
 # Is hostname defined we save the hardware configuration
-if [ "$HOSTNAME" ]; then
+if [ "${HOSTNAME}" ]; then
     save_hw_info
 fi
 
@@ -827,7 +823,7 @@ while :
 do
 
 	if [ "$MASTER" = "true" ] ;then
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Restore"    "Computer wiederherstellen" \
@@ -839,7 +835,7 @@ do
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
 	elif [ -z "$HW" ]; then
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Manual"     "Manuelles Backup/Restore einer Partition" \
@@ -847,7 +843,7 @@ do
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
 	else
-		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+		dialog  --colors --help-button --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Restore"    "Computer wiederherstellen" \
@@ -886,11 +882,11 @@ do
 		;;
 		MBR)
 			## Menu Item MBR ##
-			mbr	
+			mbr
 		;;
 		Manual)
 			## Menu Item Manual ##
-			man_part	
+			man_part
 		;;
 		Bash)
 			## Menu Item Bash ##
@@ -898,7 +894,7 @@ do
 		;;
 		Quit)
 			## Menu Item Quit ##
-			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 				--title     "\Zb\Z1Beenden" \
 				--ok-label  "Neu starten" \
 				--cancel-label "Abbrechen" \
@@ -913,8 +909,8 @@ do
 			esac
 		;;
 		About)
-                	## Menu Item About ##
-			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} $HOSTNAME" \
+			## Menu Item About ##
+			dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HWDESC} ${HOSTNAME}" \
 				--title "\Zb\Z1About" \
 				--msgbox "${ABOUT}\n Hostname : ${HOSTNAME}\n Festplatte(n): $HDs\n MAC-Adresse: ${MAC}" 17 60
 		;;
