@@ -15,7 +15,7 @@ Source:		%{name}.tar.bz2
 BuildArch:	noarch
 BuildRequires:  unzip
 BuildRequires:  oss-base
-BuildRequires:  installation-images-OSS
+BuildRequires:  installation-images-@OS@
 BuildRoot:    %{_tmppath}/%{name}-root
 Requires:	oss-base
 

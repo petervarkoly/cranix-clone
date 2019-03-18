@@ -7,7 +7,7 @@ DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
 #OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/ /home/OSC/home:varkoly:OSS-4-0:stable/
-OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:stable/
+OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0:stable/ /home/OSC/home:varkoly:OSS-4-0/
 
 install:
 	#configure tftp boot template service
@@ -80,6 +80,7 @@ dist:
 	sed "s/@VERSION@/$(VERSION)/" $(PACKAGE).spec.in > $(PACKAGE).spec
 	sed -i "s/@RELEASE@/$(NRELEASE)/"  $(PACKAGE).spec
 	for i in $(OSCDIRS); do \
+		if [ $$i == "/home/OSC/home:varkoly:OSS-4-0/" ]; then sed -i "s/@OS@/OSS/"  $(PACKAGE).spec; else sed -i "s/@OS@/openSUSE/"  $(PACKAGE).spec; fi;\
 		if [ -d $$i/$(PACKAGE) ] ; then \
 			cd $$i/$(PACKAGE); osc up; cd $(HERE);\
 			cp $(PACKAGE).tar.bz2  $(PACKAGE).spec $$i/$(PACKAGE); \
