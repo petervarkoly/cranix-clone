@@ -556,22 +556,6 @@ clone()
 		saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-            if [ "${OS:0:3}" = "Win" ]; then
-               mkdir -p /mnt/$PARTITION
-               mount /dev/$PARTITION /mnt/$PARTITION
-               if [ -e /mnt/$PARTITION/script/ ]; then
-                     rm -r /mnt/$PARTITION/script/
-               fi
-               mkdir -p /mnt/$PARTITION/script/
-               cp /mnt/itool/config/domainjoin.bat /mnt/$PARTITION/script/domainjoin.bat
-               cp /mnt/itool/config/domainjoin.ps1 /mnt/$PARTITION/script/domainjoin.ps1
-               sed -i s/HOSTNAME/${HOSTNAME}/      /mnt/$PARTITION/script/domainjoin.ps1
-               sed -i s/DOMAIN/${DOMAIN}/          /mnt/$PARTITION/script/domainjoin.ps1
-               if [ "$JOIN" = "no" ]; then
-                     sed -i 's/-mode domainjoin/-mode rename/' /mnt/$PARTITION/script/domainjoin.bat
-               fi
-               umount /mnt/$PARTITION
-	    fi
 	    CTOOL=$( get_config $PARTITION ITOOL)
             saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    chmod 775 /mnt/itool/images/$HW/$PARTITION.img
@@ -670,9 +654,13 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-        if [ -e /mnt/$PARTITION/salt/conf/minion ]; then
-	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" /mnt/$PARTITION/salt/conf/minion
-	    rm -f /mnt/$PARTITION/salt/conf/pki/minion/*
+	SALTCONF="/mnt/${PARTITION}/salt/conf";
+	if [ -e /mnt/${PARTITION}/etc/salt/conf ]; then
+		SALTCONF=/mnt/${PARTITION}/etc/salt/conf
+	fi
+        if [ -d ${SALTCONF} ]; then
+	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" ${SALTCONF}/minion
+	    rm -f ${SALTCONF}/pki/minion/*
 	    #Reset the minions ssh on the server
 	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
 	fi
