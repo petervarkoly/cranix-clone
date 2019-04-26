@@ -1,6 +1,6 @@
 #
 # Spec file for oss-clone (@VERSION@)
-# Copyright (c) 2018 Peter Varkoly <peter@varkoly.de> Nürnberg, Germany.  All rights reserved.
+# Copyright (c) Peter Varkoly <peter@varkoly.de> Nürnberg, Germany.  All rights reserved.
 #
 
 Name:		oss-clone

@@ -358,7 +358,7 @@ save_hw_info()
 # get_config Partition Variable
 get_config()
 {
-    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2"
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/$1/$2"
 }
 
 # Add the necessary configuration values to server
@@ -366,7 +366,7 @@ get_config()
 set_config()
 {
     VALUE=$( echo $3 | sed 's/ /%20/g' )
-    curl --insecure -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/$1/$2/$VALUE"
+    curl --insecure -X PUT --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/$1/$2/$VALUE"
 }
 
 get_info()
@@ -572,7 +572,7 @@ clone()
 
 get_cloned_partitions()
 {
-    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/partitions" >  /tmp/partitions
+    curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/partitions" >  /tmp/partitions
 }
 
 mbr()
@@ -660,9 +660,10 @@ make_autoconfig()
 	fi
         if [ -d ${SALTCONF} ]; then
 	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" ${SALTCONF}/minion
+	    sed -i "s/^master:.*/master: ${SERVER}/"     ${SALTCONF}/minion
 	    rm -f ${SALTCONF}/pki/minion/*
 	    #Reset the minions ssh on the server
-	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/resetMinion'
+	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/resetMinion"
 	fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
@@ -723,18 +724,18 @@ mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
 
 echo "HOSTNAME ${HOSTNAME}"
 # Check if I'm Master
-MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' 'https://admin/api/clonetool/isMaster' )
+MASTER=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/isMaster" )
 echo "MASTER $MASTER"
 
 # Get my conf value if not defined by the kernel parameter
 if  [ -z "$HW" ]; then
-    HW=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" 'https://admin/api/clonetool/hwconf' )
+    HW=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/hwconf" )
 fi
 
 echo "HW $HW"
 
 #Get my configuration description
-HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/description")
+HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
 echo "HWDESC $HWDESC"
 
 ## Get the list of the harddisks
@@ -743,7 +744,7 @@ mkdir -p /tmp/devs
 HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
 
 ## Get the DOMAIN
-DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' 'https://admin/api/clonetool/domainName' )
+DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/domainName" )
 echo "DOMAIN $DOMAIN"
 
 ## Analysing partitions
@@ -781,7 +782,7 @@ if [ "$MODUS" = "AUTO" ]; then
         restart
     fi
     if [ "$PARTITIONS" = "all" ]; then
-       PARTITIONS=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://admin/api/clonetool/$HW/partitions")
+       PARTITIONS=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/partitions")
        for i in $PARTITIONS
        do
            echo $i >> /tmp/partitions
