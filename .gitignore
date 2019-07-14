@@ -1,3 +1,6 @@
 oss-clone.spec
 oss-clone.tar.bz2
 oss-initrd.tar.bz2 
+tftp/boot/initrd
+tftp/clone/initrd
+tftp/clone/initrd64

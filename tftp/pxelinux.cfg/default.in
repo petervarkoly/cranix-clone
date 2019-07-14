@@ -7,14 +7,14 @@ noescape	0
 ui              gfxboot bootlogo
 
 menu master passwd SHA1PASS
-menu title OpenSchoolServer V3.4.2 PXE Boot Enviroment
+menu title OpenSchoolServer V4.0.1 PXE Boot Enviroment
 
 LABEL Festplatte
     LOCALBOOT 0
 
 LABEL CloneTool
         kernel clone/linux
-        append initrd=clone/initrd install=exec:/bin/start_itool MemLimit=10 MemYASTText=10 Info=tftp://install/linuxrc.config ITOOL=partclone STARTCMD=clone SLEEP=1 apm=off noresume edd=off powersaved=off nohz=off highres=off processor.max_cstate=1 nomodeset x11failsafe dhcptimeout=120
+        append initrd=clone/initrd install=exec:/bin/start_itool Info=tftp://install/linuxrc.config ITOOL=partimage STARTCMD=clone SLEEP=1 insecure=1 dhcptimeout=120
 
 
 #LABEL SUSE Linux Autoinstallation

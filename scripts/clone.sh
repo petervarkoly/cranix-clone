@@ -7,9 +7,9 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="4.0"
+                                IVERSION="4.0.1"
 
-                                IBUILD="23.09.2017"
+                                IBUILD="10.07.2019"
 #
 ###############################################################################
 
