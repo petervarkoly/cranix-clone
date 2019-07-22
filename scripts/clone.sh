@@ -1,6 +1,6 @@
 ###############################################################################
 # Script:       clone.sh
-# Copyright (c) 2017 Peter Varkoly, Nuremberg, Germany.
+# Copyright (c) Peter Varkoly, Nuremberg, Germany.
 # All rights reserved.
 #
 # Authos:               Peter Varkoly
@@ -9,7 +9,7 @@
 #
                                 IVERSION="4.0.1"
 
-                                IBUILD="10.07.2019"
+                                IBUILD="22.07.2019"
 #
 ###############################################################################
 
@@ -734,9 +734,16 @@ fi
 
 echo "HW $HW"
 
-#Get my configuration description
-HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
-echo "HWDESC $HWDESC"
+if [ -z "$HW" ]; then
+        dialog --colors  --backtitle "CloneTool - ${IVERSION} ${HOSTNAME}" \
+                --title "\Zb\Z1Ein Fehler ist aufgetreten:" \
+                --msgbox "Diesr Rechner hat keine Rechnerkonfiguration.\nBitte Rechnerkonfiguration setzten und\nRechner erneut in CloneTool starten.\n\nSo kann der Rechner nur manuell kann geklont werden." 17 60
+else
+        #Get my configuration description
+        HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
+        echo "HWDESC $HWDESC"
+
+fi
 
 ## Get the list of the harddisks
 rm -rf /tmp/devs
