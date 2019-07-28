@@ -6,7 +6,6 @@ PACKAGE         = oss-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
-#OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/ /home/OSC/home:varkoly:OSS-4-0:stable/
 OSCDIRS		= /home/OSC/home:varkoly:OSS-4-0/
 
 install:
