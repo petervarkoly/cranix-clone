@@ -64,12 +64,13 @@ exit 0
 %config(noreplace) /srv/tftp/clouds.jpg
 /srv/tftp/bootlogo
 %dir /srv/tftp/clone
+%dir /srv/tftp/boot
+%dir /srv/tftp/efi
 /srv/tftp/clone/*
 /srv/tftp/menu.c32
 /srv/tftp/pxelinux.0
 /srv/tftp/gfxboot.c32
 /srv/tftp/chain.c32
-/srv/tftp/elilo.conf
 /srv/tftp/german.kbd
 /srv/tftp/linuxrc.config_DEFAULT
 /srv/tftp/font.fnt
@@ -77,7 +78,7 @@ exit 0
 /srv/tftp/pxelinux.cfg/default.in
 /srv/tftp/linuxrc.config_DE
 /srv/tftp/bootmenu
-/srv/tftp/elilo.efi
+/srv/tftp/efi/*
 /srv/itool
 %dir /srv/ftp/itool/
 %dir /srv/ftp/itool/scripts
