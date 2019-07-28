@@ -9,8 +9,9 @@ Version:	@VERSION@
 Release:	@RELEASE@
 License:	GPL-3.0+
 Vendor:		Dipl. Ing. Peter Varkoly, Germany
+Url:		www.cephalix.eu
 Packager:	peter@varkoly.de
-Group:		Productivity/
+Group:		Productivity/Networking/Boot/Servers
 Source:		%{name}.tar.bz2
 BuildArch:	noarch
 BuildRequires:  unzip

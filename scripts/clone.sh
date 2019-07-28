@@ -1,3 +1,4 @@
+#!/bin/bash
 ###############################################################################
 # Script:       clone.sh
 # Copyright (c) Peter Varkoly, Nuremberg, Germany.

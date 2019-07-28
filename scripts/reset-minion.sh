@@ -1,3 +1,4 @@
+#!/bin/bash
 SERVER=install
 mkdir /mnt/sda{1,2}
 mount /dev/sda1 /mnt/sda1
