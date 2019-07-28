@@ -1,0 +1,70 @@
+# Crunchy-1024 GRUB2 theme is developped in Virtualbox for low resolution display
+# Hope it will run well for computer in 1024x768 resolution
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "potatoes/potatoes-in-an-old-sack.jpg"
+
+title-text: "Select the OS to boot"		# comment this line if you prefer the default title or leave it empty ("") if don't want any title
+title-font: "Poiret One Regular 28"
+title-color: "#ffffff"
+message-font: "Poiret One Regular 16"
+message-color: "#fcfcfc"
+terminal-font: "Unifont Regular 16"
+#terminal-box: "potatoes/term_borders_*.png"
+
++ boot_menu {
+  top = 14%
+  left = 4%
+  width = 45%
+  height = 70%	
+
+  menu_pixmap_style = "potatoes/menu_bg_*.png"
+
+  item_font = "Poiret One Regular 16"
+  item_color = "#fcfcfc"
+  item_height = 26
+  item_icon_space = 4
+  item_spacing = 1
+
+  selected_item_font = "Poiret One Regular 16"
+  selected_item_color= "#ffffff"
+  selected_item_pixmap_style = "potatoes/select_*.png"
+
+  icon_height = 26
+  icon_width = 26
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "potatoes/slider_*.png"
+}
+
++ label {
+  top = 94%
+  left = 1%
+  width = 98%
+  align = "center"
+  text = "@KEYMAP_MIDDLE@"		# default text : "Press enter to boot the selected OS, `e' to edit the commands before booting or `c' for a command-line." 
+  font = "Unifont Regular 16"
+  color = "#fcfcfc"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 87%
+  left = 31%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bg_color = #292825			# instead, you can use a file: bar_style = "potatoes/progress_bar_*.png"
+  fg_color = #3E613C			# instead, you can use a file: highlight_style = "potatoes/progress_highlight_*.png"
+}

@@ -1,0 +1,30 @@
+### BACKGROUND IMAGE ###
+if you use directly an image, it could corupt your grub menu (it'll reboot instead of showing your menu).
+
+DO USE THE CONVERT FUNCTION TO BE SURE THAT YOUR GRUB WILL STILL BOOT
+
+source of the image: https://s.aolcdn.com/hss/storage/midas/12bef4be104fae91d568e4704dd43d5d/203870209/stock-photo-raw-potato-food-fresh-potatoes-in-an-old-sack-on-wooden-background-free-place-for-text-top-view-357941285.jpg
+
+for example:
+sudo convert ~/Downloads/"stock-photo-raw-potato-food-fresh-potatoes-in-an-old-sack-on-wooden-background-free-place-for-text-top-view-357941285.jpg" -resize 1024x768! -quality 80 /boot/grub/themes/Crunchy-1024/potatoes/potatoes-in-an-old-sack.jpg
+
+The sudo is only to have the right to write a file in the /boot folder.
+
+### FONTS ###
+the font, in grub, can be loaded only in one size per file. You can make the pf2 file with that command:
+
+sudo grub-mkfont -s 16 -o /boot/grub/themes/Crunchy-1024/PoiretOne_normal.pf2 /usr/share/fonts/truetype/Poiret_One/PoiretOne-Regular.ttf -v
+or
+sudo grub-mkfont -s 28 -o /boot/grub/themes/Crunchy-1024/PoiretOne_title.pf2 /usr/share/fonts/truetype/Poiret_One/PoiretOne-Regular.ttf -v
+
+-s: size
+-o: output
+-v: verbose (necessary to know how to call the font in theme.txt)
+
+you can add too
+-b: bold
+
+The errors messages doesn't bother the efficiency of the resulted pf2 files.
+The font can be found here: https://fonts.google.com/specimen/Droid+Sans
+
+Source for more than 800 fonts : https://fonts.google.com/

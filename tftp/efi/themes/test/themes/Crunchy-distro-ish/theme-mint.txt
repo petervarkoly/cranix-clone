@@ -1,0 +1,151 @@
+# Crunchy distro-ish GRUB2 theme - it's Crunchy-ubuntu in green 
+# with menu_bg (in dark blue transparent), without progress_bar files + a new version of terminal borders
+# with the Gloria.jpg from Linux Mint Retro backgrounds made darker 
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "mint/Gloria.jpg"
+
+#title-text: ""					# uncomment this line if you don't want the default title. empty = no title, filled = customized title
+title-font: "Open Sans Regular 32"
+title-color: "#fcfcfc"
+message-font: "Open Sans Regular 18"
+message-color: "#fcfcfc"
+terminal-font: "Unifont Regular 16"
+terminal-box: "mint/term_borders_*.png"						# dark borders for the terminal
+
++ boot_menu {
+  top = 10%
+  left = 4%
+  width = 55%
+  height = 84%	
+
+  menu_pixmap_style = "mint/menu_bg_*.png"					# dark blue transparent background for the menu
+
+  item_font = "Open Sans Regular 18"
+  item_color = "#BFBFBF"
+  item_height = 30
+  item_icon_space = 6
+  item_spacing = 1
+
+  selected_item_font = "Open Sans Regular 18"
+  selected_item_color= "#fcfcfc"
+  selected_item_pixmap_style = "mint/select_*.png"			# the selection tool is in green
+
+  icon_height = 30
+  icon_width = 30
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "mint/slider_*.png"						# the slider is in green
+}
+
++ label {
+  top = 45%
+  left = 69%
+  align = "left"
+  text = "select"				# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 45%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "↑↓" 
+  font = "Open Sans Regular 18"
+  color = "#70AE6C"
+}
+
++ label {
+  top = 49%
+  left = 69%
+  align = "left"
+  text = "boot"					# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 49%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "enter"				# translate
+  font = "Open Sans Regular 18"
+  color = "#70AE6C"
+}
+
++ label {
+  top = 53%
+  left = 69%
+  align = "left"
+  text = "edit"					# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 53%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "e"
+  font = "Open Sans Regular 18"
+  color = "#70AE6C"
+}
+
++ label {
+  top = 57%
+  left = 69%
+  align = "left"
+  text = "command-line"			# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 57%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "c"
+  font = "Open Sans Regular 18"
+  color = "#70AE6C"
+}
+
++ label {
+  top = 61%
+  left = 69%
+  align = "left"
+  text = "back to menu"			# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 61%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "esc"					# translate
+  font = "Open Sans Regular 18"
+  color = "#70AE6C"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 75%
+  left = 61%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bg_color = #292825			# instead, you can use a file: bar_style = "mint/progress_bar_*.png"
+  fg_color = #3E613C			# instead, you can use a file: highlight_style = "mint/progress_highlight_*.png"
+}

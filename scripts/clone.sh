@@ -7,16 +7,16 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="4.0.1"
+                                IVERSION="@VERSION@"
 
-                                IBUILD="22.07.2019"
+                                IBUILD="@DATE@"
 #
 ###############################################################################
 
 ABOUT="CloneTool\n\n
 Ein Werkzeug zum sichern und wiederherstellen von Computern.\n\n
 Version: ${IVERSION}\n
-Autor  : Peter Varkoly\n
+Autor  : Dipl.-Ing. Peter Varkoly\n
 Datum  : ${IBUILD}\n
 
 ";

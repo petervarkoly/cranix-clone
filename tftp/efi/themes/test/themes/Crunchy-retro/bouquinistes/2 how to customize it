@@ -1,0 +1,30 @@
+### BACKGROUND IMAGE ###
+if you use directly an image, it could corupt your grub menu (it'll reboot instead of showing your menu).
+
+DO USE THE CONVERT FUNCTION TO BE SURE THAT YOUR GRUB WILL STILL BOOT
+
+Source of the image: https://i.pinimg.com/736x/ce/fb/06/cefb06fb5ec2888f69bd20eef30509e7--paris-s-vintage-paris.jpg
+
+for example: (2 lines to make the image bigger and cropped it to the 1920x1080 resolution):
+sudo convert ~/Downloads/cefb06fb5ec2888f69bd20eef30509e7--paris-s-vintage-paris.jpg -resize 260.9%x260.9%! -quality 100 ~/Downloads/vintage-paris_resized.jpg
+sudo convert ~/Downloads/vintage-paris_resized.jpg -crop 1920x1080+0+170 -sharpen 5.0x1.3 -quality 80 -brightness-contrast -25x-25 /boot/grub/themes/Crunchy-retro/bouquinistes/vintage-paris.jpg
+
+The sudo is only to have the right to write a file in the /boot folder.
+
+### FONTS ###
+the font, in grub, can be loaded only in one size per file. You can make the pf2 file with that command:
+
+sudo grub-mkfont -s 20 -o /boot/grub/themes/Crunchy-retro/Kalam_normal.pf2 /usr/share/fonts/truetype/Kalam/Kalam-Regular.ttf -v
+or
+sudo grub-mkfont -s 34 -o /boot/grub/themes/Crunchy-retro/Kalam_title.pf2 /usr/share/fonts/truetype/Kalam/Kalam-Regular.ttf -v
+
+-s: size
+-o: output
+-v: verbose (necessary to know how to call the font in theme.txt)
+
+you can add too:
+-b: bold
+
+The font can be found here: https://fonts.google.com/specimen/Kalam
+
+Source for more than 800 fonts : https://fonts.google.com/

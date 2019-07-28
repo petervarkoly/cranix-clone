@@ -1,0 +1,149 @@
+# Crunchy GRUB2 themes in 4 colors
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "0_commun/Ubuntu-Mate-Warm-no-logo.jpg"
+
+#title-text: ""					# uncomment this line if you don't want the default title. empty = no title, filled = customized title
+title-font: "Open Sans Regular 32"
+title-color: "#fcfcfc"
+message-font: "Open Sans Regular 18"
+message-color: "#fcfcfc"
+terminal-font: "Unifont Regular 16"
+terminal-box: "0_commun/term_borders_*.png"
+
++ boot_menu {
+  top = 9%
+  left = 4%
+  width = 55%
+  height = 84%	
+
+  menu_pixmap_style = "0_commun/menu_bg_*.png"
+
+  item_font = "Open Sans Regular 18"
+  item_color = "#BFBFBF"
+  item_height = 30
+  item_icon_space = 6
+  item_spacing = 1
+
+  selected_item_font = "Open Sans Regular 18"
+  selected_item_color= "#fcfcfc"
+  selected_item_pixmap_style = "blue/select_*.png"
+
+  icon_height = 30
+  icon_width = 30
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "blue/slider_*.png"
+}
+
++ label {
+  top = 45%
+  left = 69%
+  align = "left"
+  text = "select"				# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 45%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "↑↓" 
+  font = "Open Sans Regular 18"
+  color = "#5A91D2"
+}
+
++ label {
+  top = 49%
+  left = 69%
+  align = "left"
+  text = "boot"					# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 49%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "enter"				# translate
+  font = "Open Sans Regular 18"
+  color = "#5A91D2"
+}
+
++ label {
+  top = 53%
+  left = 69%
+  align = "left"
+  text = "edit"					# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 53%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "e"
+  font = "Open Sans Regular 18"
+  color = "#5A91D2"
+}
+
++ label {
+  top = 57%
+  left = 69%
+  align = "left"
+  text = "command-line"			# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 57%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "c"
+  font = "Open Sans Regular 18"
+  color = "#5A91D2"
+}
+
++ label {
+  top = 61%
+  left = 69%
+  align = "left"
+  text = "back to menu"			# translate
+  font = "Open Sans Regular 18"
+  color = "#fcfcfc"
+}
++ label {
+  top = 61%
+  left = 69%
+  width = 21%
+  align = "right"
+  text = "esc"					# translate
+  font = "Open Sans Regular 18"
+  color = "#5A91D2"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 75%
+  left = 61%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bar_style = "0_commun/progress_bar_*.png"					# instead of a file, you can use: bg_color = #292825
+  highlight_style = "blue/progress_highlight_*.png"			# instead of a file, you can use: fg_color = #233CB4
+}

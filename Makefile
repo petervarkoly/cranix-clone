@@ -12,7 +12,7 @@ install:
 	#configure tftp boot template service
 	mkdir -p $(DESTDIR)/usr/share/oss/templates
 	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/oss/templates/pxeboot.in
-	install -m 444 $(INSTUSER)  config/eliloboot.in          $(DESTDIR)/usr/share/oss/templates/eliloboot.in
+	install -m 444 $(INSTUSER)  config/efiboot.in            $(DESTDIR)/usr/share/oss/templates/efiboot.in
 
 	#configure tftp service
 	mkdir -p       $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
@@ -28,8 +28,8 @@ install:
 	install -m 444 $(INSTUSER)  tftp/menu.c32                 $(DESTDIR)/srv/tftp/menu.c32
 	install -m 444 $(INSTUSER)  tftp/pxelinux.0               $(DESTDIR)/srv/tftp/pxelinux.0
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
-	install -m 444 $(INSTUSER)  tftp/elilo*                   $(DESTDIR)/srv/tftp/
 	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
+	rsync -aAv tftp/efi                                       $(DESTDIR)/srv/tftp/efi/
 
 	#Install the kernel and initrd from installation-images-OSS or from the local provided clone directory
 	if [ -d clone ];  then \
@@ -51,7 +51,8 @@ install:
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/ftp/itool/scripts
-	
+	sed -i "s/@VERSION@/$(VERSION)/" $(DESTDIR)/srv/ftp/itool/scripts/clone.sh
+	sed -i "s/@DATE@/$(DATE)/"       $(DESTDIR)/srv/ftp/itool/scripts/clone.sh
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 755 $(INSTUSER) bin/*           $(DESTDIR)/usr/sbin/

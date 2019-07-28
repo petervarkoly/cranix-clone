@@ -1,0 +1,30 @@
+### BACKGROUND IMAGE ###
+if you use directly an image, it could corupt your grub menu (it'll reboot instead of showing your menu).
+
+The source of the image is: https://raw.githubusercontent.com/mate-desktop/mate-backgrounds/master/desktop/Ubuntu-Mate-Warm-no-logo.png
+
+DO USE THE CONVERT FUNCTION TO BE SURE THAT YOUR GRUB WILL STILL BOOT
+
+for example, the convert command that have been used for this theme is (after a "open a teminal here" in the folder of the image):
+sudo convert Ubuntu-Mate-Warm-no-logo.png -resize 1920x1080! -quality 80 /boot/grub/themes/Crunchy-ubuntu/0_commun/Ubuntu-Mate-Warm-no-logo.jpg
+
+The sudo is only to have the right to write a file in the /boot folder.
+
+### FONTS ###
+the font, in grub, can be loaded only in one size per file. You can make the pf2 file with that command:
+
+sudo grub-mkfont -s 18 -o /boot/grub/themes/Crunchy-ubuntu/OpenSans_normal.pf2 /usr/share/fonts/truetype/Open_Sans/OpenSans-Light.ttf -v
+or
+sudo grub-mkfont -s 32 -o /boot/grub/themes/Crunchy-ubuntu/OpenSans_title.pf2 /usr/share/fonts/truetype/Open_Sans/OpenSans-Light.ttf -v
+
+-s: size
+-o: output
+-v: verbose (necessary to know how to call the font in blue-theme.txt, green-theme.txt, grey-theme.txt or orange-theme.txt)
+
+you can too add
+-b: bold
+
+The errors messages doesn't bother the efficiency of the resulted pf2 files.
+The font can be found here: https://fonts.google.com/specimen/Open+Sans
+
+Source for more than 800 fonts : https://fonts.google.com/

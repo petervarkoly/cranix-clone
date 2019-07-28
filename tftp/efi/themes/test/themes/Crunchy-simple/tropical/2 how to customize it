@@ -1,0 +1,28 @@
+### BACKGROUND IMAGE ###
+if you use directly an image, it could corupt your grub menu (it'll reboot instead of showing your menu).
+
+DO USE THE CONVERT FUNCTION TO BE SURE THAT YOUR GRUB WILL STILL BOOT
+
+source of the image: http://bsnscb.com/data/out/201/39602842-tropical-beach-wallpapers.jpg
+
+for example (2 lines to crop the image in 2 times):
+convert ~/Downloads/39602842-tropical-beach-wallpapers.jpg -crop 100%x100%+86+35 -sharpen 5.0x1.3 -quality 100 ~/Downloads/39602842-tropical_cropped.jpg
+sudo convert -crop 1834x994+0+0 ~/Downloads/39602842-tropical_cropped.jpg -resize 1920x1080! -sharpen 5.0x1.3 -quality 80 /boot/grub/themes/Crunchy-simple/tropical/amazing-tropical-beach.jpg
+
+The sudo is only to have the right to write a file in the /boot folder.
+
+### FONTS ###
+the font, in grub, can be loaded only in one size per file. You can make the pf2 file with that command:
+
+sudo grub-mkfont -b -s 18 -o /boot/grub/themes/Crunchy-simple/ComicNeue_normal.pf2 /usr/share/fonts/opentype/ComicNeue.otf/ComicNeue-Regular.otf -v
+or
+sudo grub-mkfont -b -s 32 -o /boot/grub/themes/Crunchy-simple/ComicNeue_title.pf2 /usr/share/fonts/opentype/ComicNeue.otf/ComicNeue-Regular.otf -v
+
+-b: bold
+-s: size
+-o: output
+-v: verbose (necessary to know how to call the font in theme.txt)
+
+The font can be found here: http://comicneue.com/
+
+Source for more than 800 fonts : https://fonts.google.com/

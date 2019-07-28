@@ -1,0 +1,32 @@
+### BACKGROUND IMAGE ###
+if you use directly an image, it could corupt your grub menu (it'll reboot instead of showing your menu).
+
+DO USE THE CONVERT FUNCTION TO BE SURE THAT YOUR GRUB WILL STILL BOOT
+
+source of the image (from the installed MX-Linux distribution): https://raw.githubusercontent.com/MX-Linux/mx17-artwork/master/GRUB_background/MX-Gold1080P.png
+
+for example, the convert command that have been used for this theme is (after a "open a teminal here" in the folder of the image):
+sudo convert MX-Gold1080P.png -resize 1920x1080! -quality 80 /boot/grub/themes/Crunchy-distro-ish/MX-Linux/MX-Gold1080P.jpg
+
+The sudo is only to have the right to write a file in the /boot folder.
+
+### FONTS ###
+the font, in grub, can be loaded only in one size per file. You can make the pf2 file with that command ("open a terminal here", in the folder where the font is):
+
+sudo grub-mkfont -s 18 -o /boot/grub/themes/Crunchy-distro-ish/OpenSans-Light_normal.pf2 OpenSans-Light.ttf -v
+or
+sudo grub-mkfont -s 32 -o /boot/grub/themes/Crunchy-distro-ish/Crackdown_title.pf2 crackdr2.ttf -v
+
+-s: size
+-o: output
+-v: verbose (necessary to know how to call the font in theme.txt)
+
+you can add too
+-b: bold
+
+The errors messages doesn't bother the efficiency of the resulted pf2 files.
+The fonts can be found here: https://www.dafont.com/crackdown.font and https://fonts.google.com/specimen/Open+Sans
+
+Source for more than 800 fonts : https://fonts.google.com/
+
+crackdown is the font used for the MX-Linux logo

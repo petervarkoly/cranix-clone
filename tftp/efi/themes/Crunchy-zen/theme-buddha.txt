@@ -1,0 +1,153 @@
+# Crunchy zen GRUB2 theme - it's Crunchy-green 
+# with a background from internet and a whity transparent menu background
+# the term-borders files are not longer here
+# the title of the grub page is the default one
+# the font is PoiretOne
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "buddha/zen-buddha.jpg"
+
+#title-text: ""													# uncomment this line if you don't want the default title. empty = no title, filled = customized title
+title-font: "Poiret One Bold 32"
+title-color: "#fcfcfc"
+message-font: "Poiret One Regular 19"
+message-color: "#fcfcfc"
+terminal-font: "Unifont Regular 16"
+#terminal-box: "0_commun/term_borders_*.png"						# this theme don't have any terminal borders
+
++ boot_menu {
+  top = 9%
+  left = 4%
+  width = 65%
+  height = 55%	
+
+  menu_pixmap_style = "0_commun/menu_bg_*.png"					# the menu background is in transparent white
+
+  item_font = "Poiret One Regular 19"
+  item_color = "#1A1A1A"
+  item_height = 30
+  item_icon_space = 6
+  item_spacing = 1
+
+  selected_item_font = "Poiret One Regular 19"
+  selected_item_color= "#fcfcfc"
+  selected_item_pixmap_style = "0_commun/select_*.png"			# the selection tool is in green 
+
+  icon_height = 30
+  icon_width = 30
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "0_commun/slider_*.png"						# the slider is in green
+}
+
++ label {
+  top = 67%
+  left = 5%
+  align = "left"
+  text = "select"				# translate
+  font = "Poiret One Regular 19"
+  color = "#1A1A1A"
+}
++ label {
+  top = 67%
+  left = 5%
+  width = 21%
+  align = "right"
+  text = "↑↓" 
+  font = "Poiret One Regular 19"
+  color = "#3E613C"
+}
+
++ label {
+  top = 70%
+  left = 5%
+  align = "left"
+  text = "boot"					# translate
+  font = "Poiret One Regular 19"
+  color = "#1A1A1A"
+}
++ label {
+  top = 70%
+  left = 5%
+  width = 21%
+  align = "right"
+  text = "enter"				# translate
+  font = "Poiret One Regular 19"
+  color = "#3E613C"
+}
+
++ label {
+  top = 73%
+  left = 5%
+  align = "left"
+  text = "edit"					# translate
+  font = "Poiret One Regular 19"
+  color = "#1A1A1A"
+}
++ label {
+  top = 73%
+  left = 5%
+  width = 21%
+  align = "right"
+  text = "e"
+  font = "Poiret One Regular 19"
+  color = "#3E613C"
+}
+
++ label {
+  top = 76%
+  left = 5%
+  align = "left"
+  text = "command-line"			# translate
+  font = "Poiret One Regular 19"
+  color = "#1A1A1A"
+}
++ label {
+  top = 76%
+  left = 5%
+  width = 21%
+  align = "right"
+  text = "c"
+  font = "Poiret One Regular 19"
+  color = "#3E613C"
+}
+
++ label {
+  top = 79%
+  left = 5%
+  align = "left"
+  text = "back to menu"			# translate
+  font = "Poiret One Regular 19"
+  color = "#1A1A1A"
+}
++ label {
+  top = 79%
+  left = 5%
+  width = 21%
+  align = "right"
+  text = "esc"					# translate
+  font = "Poiret One Regular 19"
+  color = "#3E613C"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 72%
+  left = 61%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bar_style = "0_commun/progress_bar_*.png"					# instead of a file, you can use: bg_color = #292825
+  highlight_style = "0_commun/progress_highlight_*.png"		# instead of a file, you can use: fg_color = #3E613C
+}

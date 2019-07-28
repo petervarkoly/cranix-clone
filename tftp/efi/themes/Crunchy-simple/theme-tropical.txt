@@ -1,0 +1,73 @@
+# Crunchy-simple tropical GRUB2 theme is a nice background with blue tools
+# a background from internet and a whity transparent menu
+# the term-borders files are not longer here and help texts are standards
+# the title of the grub page is a customized one
+# the font is Comic Neue
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "tropical/amazing-tropical-beach.jpg"
+
+title-text: "Customized title written in theme-tropical.txt"		# comment this line if you want the default title. left empty = no title
+title-font: "Comic Neue Bold 32"
+title-color: "#fcfcfc"
+message-font: "Comic Neue Bold 18"
+message-color: "#292825"
+terminal-font: "Unifont Regular 16"
+#terminal-box: "0_commun/blue/term_borders_*.png"						# there's no terminal borders in this theme
+
++ boot_menu {
+  top = 9%
+  left = 6%
+  width = 48%
+  height = 82%	
+
+  menu_pixmap_style = "0_commun/blue/menu_bg_*.png"						# menu background is in transparent white
+
+  item_font = "Comic Neue Bold 18"
+  item_color = "#292825"
+  item_height = 30
+  item_icon_space = 6
+  item_spacing = 1
+
+  selected_item_font = "Comic Neue Bold 18"
+  selected_item_color= "#fcfcfc"
+  selected_item_pixmap_style = "0_commun/blue/select_*.png"				# select tool is in blue
+
+  icon_height = 30
+  icon_width = 30
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "0_commun/blue/slider_*.png"							# the slider is in blue
+}
+
++ label {
+  top = 94%
+  left = 1%
+  width = 98%
+  align = "center"
+  text = "@KEYMAP_LONG@"						# default text (translated via the locale setting): "Press enter to boot the selected OS, `e' to edit the commands before booting or `c' for a command-line. ESC to return previous menu." 
+  font = "Unifont Regular 16"
+  color = "#292825"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 80%
+  left = 59%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"			# default text (translated via the locale setting)
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bar_style = "0_commun/blue/progress_bar_*.png"					# instead of a file, you can use: bg_color = #292825
+  highlight_style = "0_commun/blue/progress_highlight_*.png"		# instead of a file, you can use: fg_color = #233CB4
+}

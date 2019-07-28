@@ -1,9 +1,0 @@
-default=clone
-block-size=4096
-
-image=clone/linux64
-    label=clone
-    description = "CloneTool"
-    initrd=clone/initrd64
-    append="install=exec:/bin/start_itool Info=tftp://install/linuxrc.config ITOOL=partimage STARTCMD=clone SLEEP=1 ARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1 dhcptimeout=120 insecure=1"
-

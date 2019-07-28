@@ -1,0 +1,77 @@
+# Crunchy-simple-ubuntu GRUB2 theme is Crunchy-orange with:
+# a background from internet and a whity transparent menu
+# the term-borders and progress-bar files are not longer here and help texts are standards
+# the title of the grub page is a customized one
+# the font is ubuntu
+# by Benoit THIBAUD < frombenny [at] gmail [dot] com >
+#
+# with the help of these wiki pages :
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_tutorial
+# http://wiki.rosalab.ru/en/index.php/Grub2_theme_/_reference
+#
+# and the study of theses themes
+# https://store.kde.org/content/show.php/Breeze+GRUB2+theme?content=171217
+# http://packages.ubuntu.com/xenial/admin/grub2-themes-ubuntu-mate
+
+desktop-image: "ubuntu/ubuntu-rust.jpg"
+
+title-text: "Select the OS to boot"						# comment this line if you prefer the default title or leave it empty ("") if don't want any title
+title-font: "Ubuntu Regular 32"
+title-color: "#fcfcfc"
+message-font: "Ubuntu Regular 20"
+message-color: "#fcfcfc"
+terminal-font: "Unifont Regular 16"
+#terminal-box: "0_commun/orange/term_borders_*.png"				# there's no terminal borders in this theme
+terminal-left: "0"
+terminal-top: "0"
+terminal-width: "100%"
+terminal-height: "100%"
+
++ boot_menu {
+  top = 9%
+  left = 16%
+  width = 68%
+  height = 75%	
+
+  menu_pixmap_style = "0_commun/orange/menu_bg_*.png"			# the menu background is in transparent white
+
+  item_font = "Ubuntu Regular 20"
+  item_color = "#BFBFBF"
+  item_height = 30
+  item_icon_space = 6
+  item_spacing = 1
+
+  selected_item_font = "Ubuntu Regular 20"
+  selected_item_color= "#fcfcfc"
+  selected_item_pixmap_style = "0_commun/orange/select_*.png"	# the selection tool is orange
+
+  icon_height = 30
+  icon_width = 30
+
+  scrollbar = true
+  scrollbar_width = 5
+  scrollbar_thumb = "0_commun/orange/slider_*.png"				# the slider is orange
+}
+
++ label {
+  top = 94%
+  left = 1%
+  width = 98%
+  align = "center"
+  text = "@KEYMAP_MIDDLE@"								# default text (translated via the locale setting): "Press enter to boot the selected OS, `e' to edit the commands before booting or `c' for a command-line." 
+  font = "Unifont Regular 16"
+  color = "#fcfcfc"
+}
+
++ progress_bar {
+  id = "__timeout__"
+  top = 87%
+  left = 31%
+  height = 18
+  show_text = true
+  text = "@TIMEOUT_NOTIFICATION_LONG@"					# default text (translated via the locale setting)
+  font = "Unifont Regular 16"
+  text_color = "#fcfcfc"
+  bg_color = #292825			# instead, you can use a file: bar_style = "0_commun/orange/progress_bar_*.png"
+  fg_color = #A0411E			# instead, you can use a file: highlight_style = "0_commun/orange/progress_highlight_*.png"
+}

@@ -7,7 +7,7 @@ noescape	0
 ui              gfxboot bootlogo
 
 menu master passwd SHA1PASS
-menu title OpenSchoolServer V4.0.1 PXE Boot Enviroment
+menu title OpenSchoolServer #VERSION# PXE Boot Enviroment
 
 LABEL Festplatte
     LOCALBOOT 0
