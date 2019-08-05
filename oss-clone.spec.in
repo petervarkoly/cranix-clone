@@ -38,6 +38,11 @@ Authors:
 %install
 make DESTDIR=%{buildroot} VERSION=%{version} install
 
+#%verifyscript
+#%verify_permissions -e /srv/itool/ROOT/root
+#%verify_permissions -e /srv/itool/config
+#%verify_permissions -e /srv/itool/hwinfo
+#%verify_permissions -e /srv/itool/images/manual
 
 %pre
 %service_add_pre xinetd.service
@@ -54,6 +59,10 @@ if [ -d /home/groups ]
 then
    /usr/sbin/oss_reset_itool_rights.sh
 fi
+#%set_permissions /srv/itool/ROOT/root
+#%set_permissions /srv/itool/config
+#%set_permissions /srv/itool/hwinfo
+#%set_permissions /srv/itool/images/manual
 exit 0
 
 %postun

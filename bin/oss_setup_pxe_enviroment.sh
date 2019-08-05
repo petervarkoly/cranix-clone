@@ -3,26 +3,8 @@
 . /etc/sysconfig/language
 . /etc/sysconfig/schoolserver
 
-PASS=`/usr/sbin/oss_get_admin_pw`
-SHA1PASS=`/usr/share/oss/tools/sha1pass.pl --pass $PASS`
 DATE=`/usr/share/oss/tools/oss_date.sh`
 LANG=${RC_LANG:3:2}
-SCHOOLNAME=`echo "uid admin attributes o" | oss_get_user.pl text | grep '^o ' | sed 's/o //'`
-
-ADMINPASSWORD=`oss_ldapsearch uid=admin sambaNTPassword | grep sambaNTPassword: | sed 's/sambaNTPassword: //'`
-INSTALLEDLANGUAGE=$INSTALLED_LANGUAGES
-SCHOOLLANGUAGE=$(echo $INSTALLEDLANGUAGE|sed 's/_/-/g')
-SCHOOLLANGUAGE=$(echo $SCHOOLLANGUAGE|sed 's/,/ /g')
-array=($SCHOOLLANGUAGE)
-len=${#array[*]}
-i=0
-while [ $i -lt $len ]; do
-	KKK=$(echo ${array[$i]}|grep $SCHOOL_LANGUAGE)
-	if [ $KKK ]; then
-		SCHOOLLANGUAGE=$KKK
-	fi
-	let i++
-done
 
 if [ -e /srv/tftp/linuxrc.config_$LANG ]
 then
@@ -39,7 +21,6 @@ do
      cp $base $base.$DATE
    fi
    cp $i $base
-   sed -i "s#SHA1PASS#$SHA1PASS#"      $base
 done
 
 for i in /srv/itool/config/*.templ
@@ -53,3 +34,4 @@ do
        sed -i "s/ntAdministratorPassword/$ADMINPASSWORD/" $base
    fi
 done
+

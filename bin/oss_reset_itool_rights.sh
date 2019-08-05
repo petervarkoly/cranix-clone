@@ -18,7 +18,7 @@ if [ ! -e /usr/share/oss/templates/pxeboot ]
 then
     cp /usr/share/oss/templates/pxeboot.in /usr/share/oss/templates/pxeboot
 fi
-if [ ! -e /usr/share/oss/templates/eliloboot ]
+if [ ! -e /usr/share/oss/templates/efiboot ]
 then
-    cp /usr/share/oss/templates/eliloboot.in /usr/share/oss/templates/eliloboot
+    cp /usr/share/oss/templates/efiboot.in /usr/share/oss/templates/efiboot
 fi
