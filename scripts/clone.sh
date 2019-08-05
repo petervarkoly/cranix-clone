@@ -656,8 +656,8 @@ make_autoconfig()
 	    ;;
 	esac
 	SALTCONF="/mnt/${PARTITION}/salt/conf";
-	if [ -e /mnt/${PARTITION}/etc/salt/conf ]; then
-		SALTCONF=/mnt/${PARTITION}/etc/salt/conf
+	if [ -e /mnt/${PARTITION}/etc/salt ]; then
+		SALTCONF=/mnt/${PARTITION}/etc/salt
 	fi
         if [ -d ${SALTCONF} ]; then
 	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" ${SALTCONF}/minion
