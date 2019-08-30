@@ -534,15 +534,7 @@ clone()
     for HD in $HDs
     do
         dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
-	PTTYPE=$(  parted -m -s /dev/$HD print | gawk -F : 'NR==2 { print  $6 }' )
-	case $PTTYPE in
-	    gpt)
-	      parted -m -s /dev/$HD unit s print > /mnt/itool/images/$HW/$HD.parted
-	      ;;
-	    *)
-	      sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
-	      ;;
-	esac
+        sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
     done
 
     #Now we save the selected partitions
@@ -566,6 +558,7 @@ clone()
 	make_autoconfig
 	sleep $SLEEP
     done
+    curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/softwares/saveState"
 }
 
 # Functions for restore
@@ -749,7 +742,7 @@ fi
 ## Get the list of the harddisks
 rm -rf /tmp/devs
 mkdir -p /tmp/devs
-HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. )
+HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. | grep -v sr0 )
 
 ## Get the DOMAIN
 DOMAIN=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/domainName" )
