@@ -535,6 +535,7 @@ clone()
     do
         dd of=/mnt/itool/images/$HW/$HD.mbr if=/dev/$HD count=2048 bs=512 > /dev/null 2>&1
         sfdisk -d /dev/$HD > /mnt/itool/images/$HW/$HD.sfdisk
+        sed -i /last-lba/d /mnt/itool/images/$HW/$HD.sfdisk
     done
 
     #Now we save the selected partitions
