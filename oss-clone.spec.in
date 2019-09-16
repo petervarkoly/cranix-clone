@@ -13,7 +13,6 @@ Url:		www.cephalix.eu
 Packager:	peter@varkoly.de
 Group:		Productivity/Networking/Boot/Servers
 Source:		%{name}.tar.bz2
-BuildArch:	noarch
 PreReq:         permissions
 BuildRequires:  unzip
 BuildRequires:  oss-base
