@@ -1,6 +1,3 @@
-VERSION         = $(shell cat VERSION)
-RELEASE         = $(shell cat RELEASE)
-NRELEASE        = $(shell echo $(RELEASE) + 1 | bc )
 HERE            = $(shell pwd)
 PACKAGE         = oss-clone
 DESTDIR         = /
@@ -51,7 +48,6 @@ install:
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/ftp/itool/scripts
-	sed -i "s/@VERSION@/$(VERSION)/" $(DESTDIR)/srv/ftp/itool/scripts/clone.sh
 	sed -i "s/@DATE@/$(DATE)/"       $(DESTDIR)/srv/ftp/itool/scripts/clone.sh
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
@@ -75,21 +71,13 @@ dist:
 	cp -rp Makefile bin config scripts tftp $(PACKAGE)
 	if [ -d clone ]; then cp -rp clone $(PACKAGE) ; fi
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
-	sed "s/@VERSION@/$(VERSION)/" $(PACKAGE).spec.in > $(PACKAGE).spec
-	sed -i "s/@RELEASE@/$(NRELEASE)/"  $(PACKAGE).spec
-	for i in $(OSCDIRS); do \
-		if [ $$i == "/home/OSC/home:varkoly:OSS-4-0/" ]; then sed -i "s/@OS@/openSUSE/"  $(PACKAGE).spec; else sed -i "s/@OS@/OSS/"  $(PACKAGE).spec; fi;\
-		if [ -d $$i/$(PACKAGE) ] ; then \
-			cd $$i/$(PACKAGE); osc up; cd $(HERE);\
-			cp $(PACKAGE).tar.bz2  $(PACKAGE).spec $$i/$(PACKAGE); \
-			cd $$i/$(PACKAGE); \
-			osc vc; \
-			osc addremove; \
-			osc ci -m "New Build Version"; \
-		fi; \
-	done
-	echo $(NRELEASE) > RELEASE
-	git commit -a -m "New release"
-	git push
+	xterm -e git log --raw &
+	if [ -d $(REPO)/$(PACKAGE) ] ; then \
+            cd $(REPO)/$(PACKAGE); osc up; cd $(HERE);\
+            mv $(PACKAGE).tar.bz2 $(REPO)/$(PACKAGE); \
+            cd $(REPO)/$(PACKAGE); \
+            osc vc; \
+            osc ci -m "New Build Version"; \
+        fi
 	rm -rf $(PACKAGE)
 
