@@ -1,15 +1,15 @@
 HERE            = $(shell pwd)
-PACKAGE         = oss-clone
+PACKAGE         = cranix-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	= 
-REPO		= /home/OSC/home:varkoly:OSS-4-1:leap15.1/
+REPO		= /home/OSC/home:varkoly:CRANIX-4-2/
 
 install:
 	#configure tftp boot template service
-	mkdir -p $(DESTDIR)/usr/share/oss/templates
-	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/oss/templates/pxeboot.in
-	install -m 444 $(INSTUSER)  config/efiboot.in            $(DESTDIR)/usr/share/oss/templates/efiboot.in
+	mkdir -p $(DESTDIR)/usr/share/cranix/templates
+	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/cranix/templates/pxeboot.in
+	install -m 444 $(INSTUSER)  config/efiboot.in            $(DESTDIR)/usr/share/cranix/templates/efiboot.in
 
 	#configure tftp service
 	mkdir -p       $(DESTDIR)/srv/tftp/{clone,boot,pxelinux.cfg}
@@ -48,17 +48,16 @@ install:
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/ftp/itool/scripts
-	sed -i "s/@DATE@/$(DATE)/"       $(DESTDIR)/srv/ftp/itool/scripts/clone.sh
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 755 $(INSTUSER) bin/*           $(DESTDIR)/usr/sbin/
 
-oss-initrd:
-	cd oss-initrd; tar cjf ../oss-initrd.tar.bz2 *;
+cranix-initrd:
+	cd cranix-initrd; tar cjf ../cranix-initrd.tar.bz2 *;
 	for i in $(OSCDIRS); do \
 	   if [ -d $$i/installation-images ]; then \
 	      cd $$i/installation-images; osc up; cd $(HERE); \
-	      cp oss-initrd.tar.bz2 $$i; \
+	      cp cranix-initrd.tar.bz2 $$i; \
 	      cd $$i/installation-images; \
 	      osc vc; \
 	      osc ci -m "New Build Version"; \
@@ -69,6 +68,7 @@ dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi
 	mkdir $(PACKAGE)
 	cp -rp Makefile bin config scripts tftp $(PACKAGE)
+	sed -i "s/@DATE@/$(DATE)/"       $(PACKAGE)/scripts/clone.sh
 	if [ -d clone ]; then cp -rp clone $(PACKAGE) ; fi
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	xterm -e git log --raw &

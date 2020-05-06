@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . /etc/sysconfig/language
-. /etc/sysconfig/schoolserver
+. /etc/sysconfig/cranix
 
 DATE=`/usr/share/oss/tools/oss_date.sh`
 LANG=${RC_LANG:3:2}
@@ -29,9 +29,8 @@ do
    if [ ! -e $base ] 
    then
        cp $i $base
-       sed -i "s/SCHOOLNAME/$SCHOOL_NAME/" $base
-       sed -i "s/SCHOOLLANGUAGE/$SCHOOL_LANGUAGE/" $base
-       sed -i "s/ntAdministratorPassword/$ADMINPASSWORD/" $base
+       sed -i "s/SCHOOLNAME/$CRANIX_NAME/" $base
+       sed -i "s/SCHOOLLANGUAGE/$CRANIX_LANGUAGE/" $base
    fi
 done
 
