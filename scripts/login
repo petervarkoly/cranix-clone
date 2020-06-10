@@ -1,6 +1,8 @@
 #!/bin/bash
 trap "" 0 1 2 5 15
 
+export CTOOLNAME="CRANIX Clone Tool 4.2"
+
 mkdir -p /mnt/itool
 umount /mnt/itool > /dev/null 2>&1
 rm -Rf /tmp/* > /dev/null 2>&1
@@ -141,7 +143,7 @@ register()
 
 	#Get the list of the available devices in the room
 	DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/availableIPAddresses" )
-	dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
+	dialog --backtitle "${CTOOLNAME}" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
 	DEVICE=$(cat /tmp/clone.input)
 
 	#Get the active device name
@@ -159,13 +161,8 @@ register()
 	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
 	if [ -z "${HOSTNAME}" ]
 	then
-	    dialog --backtitle "CloneTool 4.0" --title "Registration fehlgeschlagen." --msgbox "Die Regsitrierung des Rechners ist Fehlgeschlagen.\nÜber die Adminoberfläche widerholen!" 17 60
+	    dialog --backtitle "${CTOOLNAME}" --title "Registration fehlgeschlagen." --msgbox "Die Regsitrierung des Rechners ist Fehlgeschlagen.\nÜber die Adminoberfläche widerholen!" 17 60
 	    exit 0
-	fi
-	dialog --backtitle "${STARTCMD}" --title "Master" --defaultno --yesno "Ist dieser Rechner ein Klone-Master?" 6 50
-	if [ $? = 0 ]
-	then
-	    curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/devices/setMaster/1"
 	fi
 }
 
