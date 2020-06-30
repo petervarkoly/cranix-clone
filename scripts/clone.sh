@@ -820,8 +820,9 @@ do
 		dialog  --colors --help-button --backtitle "${CTOOLNAME} ${HWDESC} ${HOSTNAME}" \
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
-			"Restore"    "Computer wiederherstellen" \
+			"Restore"    "Rechner wiederherstellen" \
 			"Partition"  "Bestimmte Partitionen wiederherstellen" \
+			"Clone"      "Rechner klonen" \
 			"MBR"        "Master Boot Record wiederherstellen" \
 			"Manual"     "Manuelles Backup/Restore einer Partition" \
 			"Bash"       "Starte root-Shell (nur fuer Experten)"\
