@@ -48,6 +48,9 @@ install:
 	install -m 444 $(INSTUSER) config/*templ           $(DESTDIR)/srv/itool/config
 	install -m 400 $(INSTUSER) config/clonetool.id_rsa $(DESTDIR)/srv/itool/config
 	install -m 755 $(INSTUSER) scripts/*               $(DESTDIR)/srv/ftp/itool/scripts
+	
+	#copy windows cleanup script 
+	install -m 755 $(INSTUSER) Win10_clean.ps1 $(DESTDIR)/home/software/oss/
 	#configure some executables
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 755 $(INSTUSER) bin/*           $(DESTDIR)/usr/sbin/
