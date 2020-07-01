@@ -49,7 +49,7 @@
 			  </Credentials>
                     <Description>Setupscript for Clients</Description>
                     <Order>2</Order>
-                    <Path>powershell -file \\admin\software\oss\Win10_clean.ps1</Path>
+                    <Path>powershell -file \\admin\software\cranix\Win10_clean.ps1</Path>
                     <WillReboot>Never</WillReboot>
                 </RunSynchronousCommand>
 		<RunSynchronousCommand wcm:action="add">
