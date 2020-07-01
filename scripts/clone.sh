@@ -8,7 +8,7 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="@VERSION@"
+                                IVERSION="4.2"
 
                                 IBUILD="@DATE@"
 #
@@ -72,10 +72,14 @@ saveimage ()
 		TOOL=$3
 	fi
         case $TOOL in
-                partclone)
+                Zpartclone)
 			FSTYPE=$( cat /tmp/parts/$1/fs )
-			partclone.$FSTYPE -c -s /dev/$1 -O $2
+			partclone.$FSTYPE -c -s /dev/$1 | gzip > $2
 		;;
+                partclone)
+                        FSTYPE=$( cat /tmp/parts/$1/fs )
+                        partclone.$FSTYPE -c -s /dev/$1 -O $2
+                ;;
                 partimage)
                         partimage -z1 -f3 -V0 -o -d --batch save /dev/$1 $2
                 ;;
@@ -113,13 +117,20 @@ restore ()
 		TOOL=$( cat $2.tool )
 	fi
         case $TOOL in
-                partclone)
+                Zpartclone)
 			if [ "$MULTICAST" ]; then
-				udp-receiver --nokbd 2> /dev/null | partclone.restore -O $1
+				udp-receiver --nokbd 2> /dev/null | gunzip | partclone.restore -O $1
 			else
-				partclone.restore -s $2 -O $1
+				cat $2 | gunzip | partclone.restore -O $1
 			fi
 		;;
+		partclone)
+                        if [ "$MULTICAST" ]; then
+                                udp-receiver --nokbd 2> /dev/null | partclone.restore -O $1
+                        else
+                                partclone.restore -s $2 -O $1
+                        fi
+                ;;
                 partimage)
 			if [ "$MULTICAST" ]; then
 				udp-receiver --nokbd 2> /dev/null | gunzip | partimage -f3 --batch restore $1 stdin
@@ -245,6 +256,7 @@ man_part()
 	#Ask for backup mode
 	dialog --colors --backtitle "${CTOOLNAME}" --title "\Zb\Z1Manuelles Backup der Partition $PARTITION nach $NAME" \
 		--nocancel --radiolist "Zu verwendende Imaging Tool waehlen!" 10 80 4 \
+		Zpartclone "Partclone: für fast alle Filesysteme mit komprimierung" off \
 		partclone "Partclone: für fast alle Filesysteme" off \
 		partimage "Partimage: für ext2 ext3 und ntfs" off \
 		dd_rescue "Auch für fehlerhaften Partitionen geeignet" off \
@@ -490,9 +502,10 @@ get_info()
 	    ;;
 	esac
 	#Which tool we want to use
-	partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
+	Zpartclone="off"; partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
 	TOOL=$( get_config $PARTITION ITOOL)
 	case $TOOL in
+	    Zpartclone)	Zpartclone="on";;
 	    partclone)	partclone="on";;
 	    partimage)	partimage="on";;
 	    dd)		dd="on";;
@@ -503,10 +516,11 @@ get_info()
         dialog --colors --backtitle "${CTOOLNAME} ${HWDESC} ${HOSTNAME}" \
                 --title "\Zb\Z1Partition: $DESC" --nocancel \
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
-                partclone "Partclone"         $partclone \
-                partimage "Partimage"         $partimage \
-                dd     "dd 1 zu 1 Kopie"   $dd \
-                dd_rescue "dd_rescue"         $dd_rescue  2> /tmp/out
+                Zpartclone "Partclone + gzip" $Zpartclone \
+                partclone  "Partclone"        $partclone \
+                partimage  "Partimage"        $partimage \
+                dd         "dd 1 zu 1 Kopie"  $dd \
+                dd_rescue  "dd_rescue"        $dd_rescue  2> /tmp/out
 	TOOL=`cat /tmp/out`
 	set_config $PARTITION ITOOL $TOOL
         cp /tmp/out /mnt/itool/images/$HW/$PARTITION.tool
