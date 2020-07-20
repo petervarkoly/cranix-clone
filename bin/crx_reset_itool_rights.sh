@@ -22,3 +22,7 @@ if [ ! -e /usr/share/cranix/templates/efiboot ]
 then
     cp /usr/share/cranix/templates/efiboot.in /usr/share/cranix/templates/efiboot
 fi
+if [ ! -e /srv/itool/config/Win10Domain.xml ]
+then
+	cp /srv/itool/config/Win10Domain.xml.templ /srv/itool/config/Win10Domain.xml
+fi
