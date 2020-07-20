@@ -14,11 +14,11 @@ then
   cp /etc/xinetd.d/tftp /etc/xinetd.d/tftp.$DATE
 fi
 cp /etc/xinetd.d/tftp.in /etc/xinetd.d/tftp
-if [ ! -e /usr/share/crx/templates/pxeboot ]
+if [ ! -e /usr/share/cranix/templates/pxeboot ]
 then
-    cp /usr/share/crx/templates/pxeboot.in /usr/share/crx/templates/pxeboot
+    cp /usr/share/cranix/templates/pxeboot.in /usr/share/cranix/templates/pxeboot
 fi
-if [ ! -e /usr/share/crx/templates/efiboot ]
+if [ ! -e /usr/share/cranix/templates/efiboot ]
 then
-    cp /usr/share/crx/templates/efiboot.in /usr/share/crx/templates/efiboot
+    cp /usr/share/cranix/templates/efiboot.in /usr/share/cranix/templates/efiboot
 fi
