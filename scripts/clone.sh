@@ -8,7 +8,7 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="4.2"
+                                IVERSION="4.3"
 
                                 IBUILD="@DATE@"
 #
