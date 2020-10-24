@@ -595,15 +595,18 @@ initialize_disks()
 {
     for HD in $HDs
     do
-        echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512"
-        dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512
-	sleep 5
+	if [ -e /mnt/itool/images/$HW/$HD.mbr ]; then
+		echo "dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512"
+		dd if=/mnt/itool/images/$HW/$HD.mbr of=/dev/$HD count=2048 bs=512
+	fi
+	sleep 2
 	if [ -e /mnt/itool/images/$HW/$HD.sfdisk ]
 	then
 		echo "sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk"
 		sfdisk --force /dev/$HD < /mnt/itool/images/$HW/$HD.sfdisk
 	fi
     done
+    partprobe
     #Activate swap partitions
     for i in $( fdisk -l | grep -i 'Linux swap' | gawk '{ print $1}' )
     do
