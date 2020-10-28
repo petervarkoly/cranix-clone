@@ -2,15 +2,15 @@ HERE            = $(shell pwd)
 PACKAGE         = cranix-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
-INSTUSER	= 
-REPO		= /home/OSC/home:varkoly:CRANIX-4-2/
+INSTUSER	=
+REPO		= /home/OSC/home:varkoly:CRANIX-4-2:leap15.2/
 
 install:
 	#configure tftp boot template service
 	mkdir -p $(DESTDIR)/usr/share/cranix/templates
 	install -m 444 $(INSTUSER)  config/pxeboot.in            $(DESTDIR)/usr/share/cranix/templates/pxeboot.in
 	install -m 444 $(INSTUSER)  config/efiboot.in            $(DESTDIR)/usr/share/cranix/templates/efiboot.in
-	#copy windows cleanup script 
+	#copy windows cleanup script
 	install -m 755 $(INSTUSER)  config/Win10_clean.ps1       $(DESTDIR)/usr/share/cranix/templates/
 
 	#configure tftp service
@@ -30,19 +30,21 @@ install:
 	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
 	rsync -aAv tftp/efi/                                      $(DESTDIR)/srv/tftp/efi/
 
-	#Install the kernel and initrd from installation-images-OSS or from the local provided clone directory
-	if [ -d clone ];  then \
+	#Install the kernel and initrd from installation-images-CRANIX or from the local provided clone directory
+	if [ -e /SuSE/CRANIX/CD1/boot/x86_64/loader/initrd ]; then \
+	      install -m 444 $(INSTUSER) /SuSE/CRANIX/CD1/boot/x86_64/loader/initrd $(DESTDIR)/srv/tftp/clone/; \
+	      install -m 444 $(INSTUSER) /CD1/boot/x86_64/loader/linux $(DESTDIR)/srv/tftp/clone/; \
+	elif [ -d clone ];  then \
 		cp clone/* $(DESTDIR)/srv/tftp/clone/; \
 	else \
-		install -m 444 $(INSTUSER)  /SuSE/OSS/CD1/boot/x86_64/loader/initrd  $(DESTDIR)/srv/tftp/clone/; \
-		install -m 444 $(INSTUSER)  /CD1/boot/x86_64/loader/linux            $(DESTDIR)/srv/tftp/clone/; \
+		exit 1; \
 	fi
 	#configure itool service
 	mkdir -p -m 2750 $(DESTDIR)/srv/itool/config
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/images/manual
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/hwinfo
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
-	
+
 	mkdir -p $(DESTDIR)/etc/xinetd.d/
 	mkdir -p $(DESTDIR)/srv/itool/config
 	mkdir -p $(DESTDIR)/srv/ftp/itool/scripts
@@ -65,7 +67,7 @@ cranix-initrd:
 	      osc vc; \
 	      osc ci -m "New Build Version"; \
 	   fi; \
-	done 
+	done
 
 dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi
