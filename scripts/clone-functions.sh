@@ -741,13 +741,17 @@ do_register()
 
 }
 
-get_real_hostname() {
+get_real_config() {
 	MAC=$( cat /sys/class/net/wlan0/address )
 	export MAC
-	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/devices/hostnameByMAC/hostnameByMAC$MAC" )
+	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/devices/hostnameByMAC/$MAC" )
 	if [ -z "$HOSTNAME" -o "${HOSTNAME:0:7}" == '{"code"' ]; then
 		do_register
 	else
 		export HOSTNAME
 	fi
+	HW=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/byMac/$MAC")
+	export HW
+	HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
+	export HWDESC
 }

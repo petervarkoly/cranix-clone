@@ -55,7 +55,7 @@ else
         echo "HWDEVTYPE $HWDEVTYPE"
 	export HWDEVTYPE
 	if [ "$HWDEVTYPE" == "cloneProxy" ]; then
-		get_real_hostname
+		get_real_config
 	fi
 fi
 sleep $SLEEP
