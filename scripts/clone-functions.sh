@@ -653,16 +653,19 @@ make_autoconfig()
 	    ;;
 	    Linux|Data)
 		mount -o rw /dev/$PARTITION /mnt/$PARTITION
+		if [ -d /mnt/$PARTITION/etc ]; then
+                        echo "${HOSTNAME}.${DOMAIN}"> /mnt/$PARTITION/etc/hostname
+                fi
 	    ;;
 	    *)
 	    ;;
 	esac
 	SALTCONF="/mnt/${PARTITION}/salt/conf";
-	if [ -e /mnt/${PARTITION}/etc/salt ]; then
+	if [ -d /mnt/${PARTITION}/etc/salt ]; then
 		SALTCONF=/mnt/${PARTITION}/etc/salt
 	fi
         if [ -d ${SALTCONF} ]; then
-	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" ${SALTCONF}/minion
+	    echo "${HOSTNAME}.${DOMAIN}">  ${SALTCONF}/minion_id
 	    sed -i "s/^master:.*/master: ${SERVER}/"     ${SALTCONF}/minion
 	    rm -f ${SALTCONF}/pki/minion/*
 	    #Reset the minions ssh on the server
