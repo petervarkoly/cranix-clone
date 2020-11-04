@@ -723,12 +723,12 @@ do_register()
              ROOMS="${ROOMS} $j $ON "
              ON="off"
         done
-        dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
+        dialog --backtitle "CloneTool 4.0" --title "Rechner mit WLAN-Karte registrieren"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
         ROOM=$(cat /tmp/clone.input)
 
         #Get the list of the available devices in the room
         DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/availableIPAddresses" )
-        dialog --backtitle "${CTOOLNAME}" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
+        dialog --backtitle "${CTOOLNAME}" --title "Rechner mit WLAN-Karte registrieren"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
         DEVICE=$(cat /tmp/clone.input)
 
         #Lets register the device
@@ -737,7 +737,7 @@ do_register()
 	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/devices/hostnameByMAC/$MAC" )
 	if [ -z "$HOSTNAME" -o "${HOSTNAME:0:7}" == '{"code"'  ]; then
 		dialog --backtitle "${CTOOLNAME}" --title "Registration fehlgeschlagen." --msgbox "Die Regsitrierung des Rechners ist Fehlgeschlagen.\nÜber die Adminoberfläche widerholen!" 17 60
-        	exit 0
+		exit 1
 	else
 		export HOSTNAME
 	fi
