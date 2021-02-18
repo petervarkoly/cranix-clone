@@ -754,7 +754,7 @@ get_real_config() {
 	else
 		export HOSTNAME
 	fi
-	HW=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/byMac/$MAC")
+	HW=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/byMac/$MAC")
 	export HW
 	HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
 	export HWDESC
