@@ -107,6 +107,10 @@ restore ()
 	elif [ -e $2.tool ]; then
 		TOOL=$( cat $2.tool )
 	fi
+        echo "#################################################"
+        echo "Warte auf Daten für: $1"
+        echo "#################################################"
+
         case $TOOL in
                 Zpartclone)
 			if [ "$MULTICAST" ]; then

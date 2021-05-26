@@ -7,7 +7,7 @@ noescape	0
 ui              gfxboot bootlogo
 
 menu master passwd SHA1PASS
-menu title OpenSchoolServer #VERSION# PXE Boot Enviroment
+menu title CRANIX #VERSION# PXE Boot Enviroment
 
 LABEL Festplatte
     LOCALBOOT 0

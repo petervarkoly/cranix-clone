@@ -3,7 +3,7 @@ PACKAGE         = cranix-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	=
-REPO		= /home/OSC/home:varkoly:CRANIX-4-2:leap15.2/
+REPO		= /home/OSC/home:pvarkoly:CRANIX/
 
 install:
 	#configure tftp boot template service
