@@ -750,7 +750,7 @@ do_register()
 }
 
 get_real_config() {
-	MAC=$( cat /sys/class/net/wlan0/address )
+	MAC=$( hwinfo --wlan | gawk '/Permanent HW Address:/ { print$4 }' )
 	export MAC
 	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/devices/hostnameByMAC/$MAC" )
 	if [ -z "$HOSTNAME" -o "${HOSTNAME:0:7}" == '{"code"' ]; then

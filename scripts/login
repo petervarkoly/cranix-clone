@@ -55,12 +55,9 @@ then
 else
 	authorization
 	source /tmp/apiparams
-	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/hostName" )
 	if [ -z "${HOSTNAME}" ]; then
 		register
 	fi
-	echo "TOKEN=$TOKEN"         >  /tmp/apiparams
-	echo "HOSTNAME=${HOSTNAME}" >> /tmp/apiparams
 	/bin/bash ${CDEBUG} /root/${STARTCMD}.sh
 	curl --insecure -X DELETE --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/sessions/$TOKEN"
 	exit 0

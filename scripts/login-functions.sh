@@ -74,6 +74,9 @@ authorization()
                 ## GET A SESSION TOKEN
                 TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" "https://${SERVER}/api/sessions/login" )
                 if [ "$TOKEN" -a "${TOKEN:0:7}" != '{"code"' ]; then
+			HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
+		        echo "TOKEN=$TOKEN"         >  /tmp/apiparams
+		        echo "HOSTNAME=${HOSTNAME}" >> /tmp/apiparams
 			export TOKEN
                         return
                 fi
