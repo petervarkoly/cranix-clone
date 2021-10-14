@@ -651,6 +651,11 @@ make_autoconfig()
 		    sed -i "s/PRODUCTID/$ProductID/"      /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		    sed -i "s/DOMAIN/${DOMAIN}/"          /mnt/$PARTITION/Windows/Panther/Unattend.xml
 		fi
+		if [ -d  /mnt/itool/config/${OS}${JOIN}.config ]; then
+			rm -rf /mnt/$PARTITION/config/
+			mkdir /mnt/$PARTITION/config
+			cp /mnt/itool/config/${OS}${JOIN}.config/* /mnt/$PARTITION/config/
+		fi
 		if [ -e /mnt/$PARTITION/script/ ]; then
                     rm -r /mnt/$PARTITION/script/
                 fi
