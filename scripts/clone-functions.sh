@@ -110,6 +110,7 @@ restore ()
         echo "#################################################"
         echo "Warte auf Daten für: $1"
         echo "#################################################"
+	sleep $SLEEP
 
         case $TOOL in
                 Zpartclone)
