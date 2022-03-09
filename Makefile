@@ -27,7 +27,7 @@ install:
 	install -m 444 $(INSTUSER)  tftp/menu.c32                 $(DESTDIR)/srv/tftp/menu.c32
 	install -m 444 $(INSTUSER)  tftp/pxelinux.0               $(DESTDIR)/srv/tftp/pxelinux.0
 	install -m 444 $(INSTUSER)  tftp/linuxrc.config*          $(DESTDIR)/srv/tftp/
-	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default.in  $(DESTDIR)/srv/tftp/pxelinux.cfg/default.in
+	install -m 444 $(INSTUSER)  tftp/pxelinux.cfg/default     $(DESTDIR)/srv/tftp/pxelinux.cfg/default
 	rsync -aAv tftp/efi/                                      $(DESTDIR)/srv/tftp/efi/
 
 	#Install the kernel and initrd from installation-images-CRANIX or from the local provided clone directory

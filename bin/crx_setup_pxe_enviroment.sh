@@ -14,17 +14,6 @@ else
   cp  /srv/tftp/linuxrc.config_DEFAULT  /srv/tftp/linuxrc.config
 fi
 
-for i in /srv/tftp/pxelinux.cfg/*.in
-do
-   base="/srv/tftp/pxelinux.cfg/$( basename $i .in )"
-   if [ -e $base ] 
-   then
-     cp $base $base.$DATE
-   fi
-   cp $i $base
-   sed -i "s/#VERSION#/${VERSION}/" $base
-done
-
 for i in /srv/itool/config/*.templ
 do
    base="/srv/itool/config/"`basename $i .templ`
