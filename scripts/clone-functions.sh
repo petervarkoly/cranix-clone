@@ -769,3 +769,12 @@ get_real_config() {
 	HWDESC=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/description")
 	export HWDESC
 }
+
+clean_disks()
+{
+    for HD in $HDs
+    do
+            echo "Cleaning /dev/$HD"
+            dd status=progress if=/dev/zero of=/dev/${HD} bs=65536
+    done
+}

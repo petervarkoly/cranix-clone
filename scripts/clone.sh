@@ -104,6 +104,10 @@ if [ "$MODUS" = "AUTO" ]; then
         mbr
         restart
     fi
+    if [ "${PARTITIONS,,}" = "clean" ]; then
+        clean_disks
+        restart
+    fi
     if [ "$PARTITIONS" = "all" ]; then
        PARTITIONS=$(curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/$HW/partitions")
        for i in $PARTITIONS
@@ -139,6 +143,7 @@ do
 			--nocancel --title "\Zb\Z1Hauptmenu" \
 			--menu "Waehlen Sie den gewuenschten Modus" 20 70 12 \
 			"Manual"     "Manuelles Backup/Restore einer Partition" \
+			"Clean"      "Alle Daten auf der Festplatte löschen" \
 			"Bash"       "Starte root-Shell (nur fuer Experten)"\
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
@@ -151,6 +156,7 @@ do
 			"Clone"      "Rechner klonen" \
 			"MBR"        "Master Boot Record wiederherstellen" \
 			"Manual"     "Manuelles Backup/Restore einer Partition" \
+			"Clean"      "Alle Daten auf der Festplatte löschen" \
 			"Bash"       "Starte root-Shell (nur fuer Experten)"\
 			"Quit"       "Beenden"\
 			"About"      "About" 2> /tmp/clone.input
@@ -189,6 +195,10 @@ do
 			## Menu Item Manual ##
 			man_part
 		;;
+		Clean)
+                        ## Menu Item Clean ##
+                        clean_disks
+                ;;
 		Bash)
 			## Menu Item Bash ##
 			/bin/bash
