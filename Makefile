@@ -73,7 +73,7 @@ dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi
 	mkdir $(PACKAGE)
 	cp -rp Makefile bin config scripts tftp $(PACKAGE)
-	sed -i "s/@DATE@/$(DATE)/"       $(PACKAGE)/scripts/clone.sh
+	sed -i "s/#DATE#/$(DATE)/"       $(PACKAGE)/scripts/clone.sh
 	if [ -d clone ]; then cp -rp clone $(PACKAGE) ; fi
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	xterm -e git log --raw &

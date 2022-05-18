@@ -8,9 +8,9 @@
 #
 # Description:          Cloning tool for cloning more partitions
 #
-                                IVERSION="4.3"
+                                IVERSION="4.4"
 
-                                IBUILD="20200824"
+                                IBUILD="#DATE#"
 #
 ###############################################################################
 
@@ -30,7 +30,16 @@ fi
 . /tmp/credentials
 . /tmp/apiparams
 
-mount -t cifs -o credentials=/tmp/credentials //${SERVER}/itool /mnt/itool
+# Since 4.4 admin and file server can be separated.
+# The FILESERVER can be given as boot parameter
+if [ -z "${FILESERVER}" ]; then
+	FILESERVER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/system/configuration/FILESERVER" )
+else
+	if [ -z  "${FILESERVER}" ]; then
+		FILESERVER=${SERVER}
+	fi
+fi
+mount -t cifs -o credentials=/tmp/credentials //${FILESERVER}/itool /mnt/itool
 
 echo "HOSTNAME ${HOSTNAME}"
 # Get my conf value if not defined by the kernel parameter
