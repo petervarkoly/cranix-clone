@@ -26,6 +26,8 @@ auto_login()
         HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
         echo "TOKEN=$TOKEN"         >  /tmp/apiparams
         echo "HOSTNAME=${HOSTNAME}" >> /tmp/apiparams
+	WORKGROUP=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/system/configuration/WORKGROUP" )
+	echo "domain=${WORKGROUP}"   >> /tmp/credentials
         bash ${CDEBUG} /root/${STARTCMD}.sh
         curl --insecure -X DELETE --header 'Content-Type: application/json' --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/sessions/$TOKEN"
         exit 0
@@ -67,7 +69,7 @@ authorization()
                        --insecure --passwordbox "Bitte geben Sie das Passwort fuer $USERNAME ein:\n" 10 60 2> /tmp/userpassword
                 echo "username=$USERNAME" >  /tmp/credentials;
                 echo -n "password="       >> /tmp/credentials; cat /tmp/userpassword >> /tmp/credentials;
-                echo ""                   >> /tmp/credentials
+		echo "" >> /tmp/credentials
                 chmod 400 /tmp/credentials
                 chmod 400 /tmp/userpassword
                 . /tmp/credentials
@@ -75,8 +77,10 @@ authorization()
                 TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" "https://${SERVER}/api/sessions/login" )
                 if [ "$TOKEN" -a "${TOKEN:0:7}" != '{"code"' ]; then
 			HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
+			WORKGROUP=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/system/configuration/WORKGROUP" )
 		        echo "TOKEN=$TOKEN"         >  /tmp/apiparams
 		        echo "HOSTNAME=${HOSTNAME}" >> /tmp/apiparams
+			echo "domain=${WORKGROUP}"  >> /tmp/credentials
 			export TOKEN
                         return
                 fi
