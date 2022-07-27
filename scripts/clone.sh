@@ -30,8 +30,7 @@ fi
 # Since 4.4 admin and file server can be separated.
 # The FILESERVER can be given as boot parameter
 if [ -z "${FILESERVER}" ]; then
-	FILESERVER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/system/configuration/FILESERVER" )
-else
+	FILESERVER=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/system/configuration/FILESERVER_NETBIOSNAME" )
 	if [ -z  "${FILESERVER}" ]; then
 		FILESERVER=${SERVER}
 	fi
