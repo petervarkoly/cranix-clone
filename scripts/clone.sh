@@ -67,7 +67,7 @@ sleep $SLEEP
 ## Get the list of the harddisks
 rm -rf /tmp/devs
 mkdir -p /tmp/devs
-HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. | grep -v sr0 )
+HDs=$( gawk '{if ( $2==0 ) { print $4 }}' /proc/partitions | grep -v loop. | grep -v sr0 | grep -v zram )
 export HDs
 
 ## Get the DOMAIN
