@@ -552,14 +552,13 @@ clone()
     do
 	OS=$( get_config $PARTITION OS )
 	JOIN=$( get_config $PARTITION JOIN)
+        CTOOL=$( get_config $PARTITION ITOOL)
 	if [ "$OS" = "Data" ]; then
 	    FORMAT=$( get_config $PARTITION FORMAT)
 	    if [ $FORMAT = 'clone' ]; then
-	        CTOOL=$( get_config $PARTITION ITOOL)
 		saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    fi
 	else
-	    CTOOL=$( get_config $PARTITION ITOOL)
             saveimage $PARTITION /mnt/itool/images/$HW/$PARTITION.img $CTOOL
 	    chmod 775 /mnt/itool/images/$HW/$PARTITION.img
 	fi
@@ -694,7 +693,8 @@ restore_partitions()
 {
      for PARTITION in `cat /tmp/partitions`
      do
-	OS=$( get_config $PARTITION OS)
+	OS=$(get_config $PARTITION OS)
+	TOOL=$(get_config $PARTITION ITOOL)
 	if [ $OS = 'Data' ]; then
 	   FORMAT=$( get_config $PARTITION FORMAT)
 		case $FORMAT in
@@ -705,11 +705,11 @@ restore_partitions()
 				/sbin/mkswap /dev/$PARTITION
 			;;
 			clone)
-				restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img
+				restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $TOOL
 			;;
 		esac
 	elif [ -e /mnt/itool/images/$HW/$PARTITION.img ]; then
-		restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img
+		restore /dev/$PARTITION /mnt/itool/images/$HW/$PARTITION.img $TOOL
 	else
 		dialog --colors  --backtitle "${CTOOLNAME} ${HWDESC} ${HOSTNAME}" \
 			--title "\Zb\Z1Ein Fehler ist aufgetreten:" \
