@@ -58,17 +58,15 @@ install:
 	mkdir -p $(DESTDIR)/usr/sbin
 	install -m 755 $(INSTUSER) bin/*           $(DESTDIR)/usr/sbin/
 
-cranix-initrd:
+initrd:
 	cd cranix-initrd; tar cjf ../cranix-initrd.tar.bz2 *;
-	for i in $(OSCDIRS); do \
-	   if [ -d $$i/installation-images ]; then \
-	      cd $$i/installation-images; osc up; cd $(HERE); \
-	      cp cranix-initrd.tar.bz2 $$i; \
-	      cd $$i/installation-images; \
-	      osc vc; \
-	      osc ci -m "New Build Version"; \
-	   fi; \
-	done
+	if [ -d $(REPO)/installation-images ] ; then \
+		cd $(REPO)/installation-images; osc up; cd $(HERE);\
+		mv cranix-initrd.tar.bz2 $(REPO)/installation-images/;\
+		cd $(REPO)/installation-images; \
+		osc vc; \
+		osc ci -m "New Build Version"; \
+	fi
 
 dist:
 	if [ -e $(PACKAGE) ]; then rm -rf $(PACKAGE); fi

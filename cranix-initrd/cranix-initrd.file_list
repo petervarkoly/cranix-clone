@@ -1,6 +1,6 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
-# oss itool extra packages
+# cranix itool extra packages
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 coreutils:
@@ -32,9 +32,12 @@ grep:
 
 gptfdisk:
    /usr/sbin/sgdisk
+   /usr/sbin/gdisk
 
 joe:
    /usr/bin/joe
+
+libext2fs2:
 
 ntfsprogs:
 
@@ -57,15 +60,16 @@ util-linux:
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
-# oss extra scripts and config files
+# cranix extra scripts and config files
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 e mkdir -p -m 700 root/.ssh/
-e mkdir -p -m 755 usr/share/YaST2/clients/ 
+e mkdir -p usr/share/YaST2/lib/y2system_role_handlers/
+e mkdir -p usr/lib/rpm/gnupg/keys/
 x bin/*                     bin/
 x root/*                    root/
 x etc/ssh/sshd_config       etc/ssh/sshd_config
 x root/.ssh/authorized_keys root/.ssh/authorized_keys
-x clients/inst_oss-check-update.rb usr/share/YaST2/clients/inst_oss-check-update.rb
- 
+x usr/share/YaST2/lib/y2system_role_handlers/cranix_role_finish.rb usr/share/YaST2/lib/y2system_role_handlers/cranix_role_finish.rb
+x usr/lib/rpm/gnupg/keys/gpg-pubkey-45de42b0-553d9175.asc.key usr/lib/rpm/gnupg/keys/gpg-pubkey-45de42b0-553d9175.asc.key
