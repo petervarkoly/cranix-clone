@@ -254,7 +254,6 @@ man_part()
 		--nocancel --radiolist "Zu verwendende Imaging Tool waehlen!" 10 80 4 \
 		Zpartclone "Partclone: für fast alle Filesysteme mit komprimierung" off \
 		partclone "Partclone: für fast alle Filesysteme" off \
-		partimage "Partimage: für ext2 ext3 und ntfs" off \
 		dd_rescue "Auch für fehlerhaften Partitionen geeignet" off \
 		dd	  "dd"        off \
 		2> /tmp/itool.input
@@ -499,11 +498,12 @@ get_info()
 	esac
 	#Which tool we want to use
 	Zpartclone="off"; partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
+	PARTIMAGE=""
 	TOOL=$( get_config $PARTITION ITOOL)
 	case $TOOL in
 	    Zpartclone)	Zpartclone="on";;
 	    partclone)	partclone="on";;
-	    partimage)	partimage="on";;
+	    partimage)	PARTIMAGE="partimage  Partimage        on";;
 	    dd)		dd="on";;
 	    dd_rescue)	dd_rescue="on";;
 	    *)
@@ -514,7 +514,7 @@ get_info()
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
                 Zpartclone "Partclone + gzip" $Zpartclone \
                 partclone  "Partclone"        $partclone \
-                partimage  "Partimage"        $partimage \
+                $PARTIMAGE \
                 dd         "dd 1 zu 1 Kopie"  $dd \
                 dd_rescue  "dd_rescue"        $dd_rescue  2> /tmp/out
 	TOOL=`cat /tmp/out`
