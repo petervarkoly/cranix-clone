@@ -4,7 +4,7 @@ default 	0
 ui              gfxboot bootlogo
 
 LABEL	cloneTool
-        kernel clone/linux
-        append initrd=clone/initrd install=exec:/bin/start_itool Info=tftp://install/linuxrc.config ITOOL=parclone STARTCMD=clone SLEEP=1 PARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1 dhcptimeout=120 insecure=1
+        kernel boot/linux
+        append initrd=boot/initrd root=live:ftp://install/boot/squashfs.img ip=dhcp init=/bin/start_itool STARTCMD=clone SLEEP=1 PARTITIONS=#PARTITIONS# MODUS=AUTO MULTICAST=1
         IPAPPEND 2
 

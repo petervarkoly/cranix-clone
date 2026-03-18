@@ -35,7 +35,7 @@ if [ -z "${FILESERVER}" ]; then
 		FILESERVER=${SERVER}
 	fi
 fi
-mount -t cifs -o credentials=/tmp/credentials //${FILESERVER}/itool /mnt/itool
+/sbin/mount.cifs -o credentials=/tmp/credentials //${FILESERVER}/itool /mnt/itool
 
 echo "HOSTNAME ${HOSTNAME}"
 # Get my conf value if not defined by the kernel parameter

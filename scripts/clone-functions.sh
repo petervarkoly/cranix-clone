@@ -41,7 +41,7 @@ backup_image()
 }
 #########################
 # The image save cmd
-# saveimage $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ] [ cleanup ]
+# saveimage $PARTITON /mnt/itool [ Zpartclone|partclone|dd|dd_rescue ] [ cleanup ]
 ########################
 saveimage ()
 {
@@ -71,9 +71,6 @@ saveimage ()
                         FSTYPE=$( cat /tmp/parts/$1/fs )
                         partclone.$FSTYPE -c -s /dev/$1 -O $2
                 ;;
-                partimage)
-                        partimage -z1 -f3 -V0 -o -d --batch save /dev/$1 $2
-                ;;
                 dd)
 			echo "#################################################"
 			echo "#    Das erstellen des Images wurde gestartet.  #"
@@ -97,7 +94,7 @@ saveimage ()
 
 #########################
 # The image restore cmd
-# restore $PARTITON /mnt/itool [ partclone|partimage|dd|dd_rescue ]
+# restore $PARTITON path [ Zpartclone|partclone|dd|dd_rescue ]
 ########################
 restore ()
 {
@@ -107,13 +104,13 @@ restore ()
 	elif [ -e $2.tool ]; then
 		TOOL=$( cat $2.tool )
 	fi
-        echo "#################################################"
-        echo "Warte auf Daten für: $1"
-        echo "#################################################"
+	echo "#################################################"
+	echo "Warte auf Daten für: $1"
+	echo "#################################################"
 	sleep $SLEEP
 
-        case $TOOL in
-                Zpartclone)
+	case $TOOL in
+		Zpartclone)
 			if [ "$MULTICAST" ]; then
 				udp-receiver --nokbd 2> /dev/null | gunzip | partclone.restore -O $1
 			else
@@ -121,39 +118,32 @@ restore ()
 			fi
 		;;
 		partclone)
-                        if [ "$MULTICAST" ]; then
-                                udp-receiver --nokbd 2> /dev/null | partclone.restore -O $1
-                        else
-                                partclone.restore -s $2 -O $1
-                        fi
-                ;;
-                partimage)
+		        if [ "$MULTICAST" ]; then
+		                udp-receiver --nokbd 2> /dev/null | partclone.restore -O $1
+		        else
+		                partclone.restore -s $2 -O $1
+		        fi
+		;;
+		dd)
 			if [ "$MULTICAST" ]; then
-				udp-receiver --nokbd 2> /dev/null | gunzip | partimage -f3 --batch restore $1 stdin
-			else
-				partimage -f3 --batch restore $1 $2
-			fi
-                ;;
-                dd)
-			if [ "$MULTICAST" ]; then
-                       udp-receiver --nokbd 2> /dev/null | gunzip | dd of=$1 bs=65536
+		                udp-receiver --nokbd 2> /dev/null | gunzip | dd of=$1 bs=65536
 			else
 				echo "#################################################"
 				echo "# Das Zurückspielen des Images wurde gestartet. #"
 				echo "# Das kann sehr viel Zeit in Anschpruch nehmen. #"
 				echo "# Warten bis das Hauptmenü wieder kommt!  #"
 				echo "#################################################"
-                       cat $2 | gunzip | dd of=$1 bs=65536
+		       cat $2 | gunzip | dd of=$1 bs=65536
 			fi
-                ;;
-                dd_rescue)
+		;;
+		dd_rescue)
 			if [ "$MULTICAST" ]; then
 				udp-receiver --nokbd 2> /dev/null | gunzip | /bin/dd_rescue /dev/stdin $1
 			else
 				cat $2 | gunzip | dd_rescue /dev/stdin $1
 			fi
-                ;;
-        esac
+		;;
+	esac
 	milestone "End restore $1,$2,$3,$TOOL"
 }
 
@@ -405,12 +395,10 @@ get_info()
         DESC=`gawk "NR==$i { print }" /tmp/descriptions`
 	set_config $PARTITION DESC "$DESC"
 	OS=$( get_config $PARTITION OS )
-	WinBoot="off"; Win10="off"; Win7="off"; Win8="off"; Linux="off"; Data="off";
+	WinBoot="off"; Win="off"; Linux="off"; Data="off";
 	case $OS in
 	    WinBoot) WinBoot="on";;
-	    Win10) Win10="on";;
-	    Win7)  Win7="on";;
-	    Win8)  Win8="on";;
+	    Win)     Win="on";;
 	    Linux) Linux="on";;
 	    Data) Data="on";;
 	esac
@@ -418,10 +406,8 @@ get_info()
         dialog --colors --backtitle "${CTOOLNAME} ${HWDESC} ${HOSTNAME}" \
 		--title "\Zb\Z1Partition: $DESC" --nocancel \
 		--radiolist "Waehlen Sie das Betriebsystem:" 18 60 8 \
-		Win10    "Windows 10"           $Win10 \
-		Win7     "Windows 7"            $Win7 \
+		Win      "Windows"               $Win \
 		WinBoot  "Windows Bootpartition" $WinBoot \
-		Win8     "Windows 8"            $Win8 \
 		Linux    "Linux"                $Linux \
 		Data     "Partition fuer Daten" $Data 2> /tmp/out
 	OS=`cat /tmp/out`
@@ -497,24 +483,21 @@ get_info()
 	    ;;
 	esac
 	#Which tool we want to use
-	Zpartclone="off"; partclone="off"; partimage="off"; dd="off"; dd_rescue="off";
+	Zpartclone="off"; partclone="off"; dd="off"; dd_rescue="off";
 	PARTIMAGE=""
 	TOOL=$( get_config $PARTITION ITOOL)
 	case $TOOL in
 	    Zpartclone)	Zpartclone="on";;
 	    partclone)	partclone="on";;
-	    partimage)	PARTIMAGE="partimage  Partimage        on";;
 	    dd)		dd="on";;
 	    dd_rescue)	dd_rescue="on";;
-	    *)
-		partclone="on";;
+	    *)          Zpartclone="on";;
 	esac
         dialog --colors --backtitle "${CTOOLNAME} ${HWDESC} ${HOSTNAME}" \
                 --title "\Zb\Z1Partition: $DESC" --nocancel \
                 --radiolist "Waehlen Sie das Imagingtool fuer die Partition:" 18 60 8 \
                 Zpartclone "Partclone + gzip" $Zpartclone \
                 partclone  "Partclone"        $partclone \
-                $PARTIMAGE \
                 dd         "dd 1 zu 1 Kopie"  $dd \
                 dd_rescue  "dd_rescue"        $dd_rescue  2> /tmp/out
 	TOOL=`cat /tmp/out`

@@ -97,41 +97,42 @@ authorization()
 
 register()
 {
-        #We have to register the workstation
-        ON="on"
-        ROOMS=''
-        for i in $( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/roomsToRegister" )
-        do
-             j=$( echo $i | sed 's/##/ /' )
-             ROOMS="${ROOMS} $j $ON "
-             ON="off"
-        done
-        dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
-        ROOM=$(cat /tmp/clone.input)
+	#We have to register the workstation
+	ON="on"
+	ROOMS=''
+	for i in $( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/roomsToRegister" )
+	do
+	     j=$( echo $i | sed 's/##/ /' )
+	     ROOMS="${ROOMS} $j $ON "
+	     ON="off"
+	done
+	dialog --backtitle "CloneTool 4.0" --title "Rechner muss registriert werden"  --nocancel --radiolist "Waehlen Sie den gewuenschten Raum" 18 60 8  $ROOMS 2> /tmp/clone.input
+	ROOM=$(cat /tmp/clone.input)
 
-        #Get the list of the available devices in the room
-        DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/availableIPAddresses" )
-        dialog --backtitle "${CTOOLNAME}" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
-        DEVICE=$(cat /tmp/clone.input)
+	#Get the list of the available devices in the room
+	DEVICES=$( curl --insecure -X GET --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/availableIPAddresses" )
+	dialog --backtitle "${CTOOLNAME}" --title "Rechner muss registriert werden"  --nocancel --menu "Waehlen Sie den gewuenschten Rechnernamen" 18 60 8  $DEVICES 2> /tmp/clone.input
+	DEVICE=$(cat /tmp/clone.input)
 
-        #Get the active device name
-        ETH=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
-        export MAC=$(cat /sys/class/net/$ETH/address )
+	#Get the active device name
+	ETH=$(ip link | grep 'state UP' | gawk '{ print $2 }' | sed 's/://')
+	export MAC=$(cat /sys/class/net/$ETH/address )
 
-        #Lets register the device
-        RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/$MAC/$DEVICE" )
-        curl --insecure -X DELETE --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/sessions/$TOKEN"
-        sleep 3
-        ifdown $ETH
-        sleep 1
-        ifup   $ETH
-        TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" "https://${SERVER}/api/sessions/login" )
-        HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
-        if [ -z "${HOSTNAME}" ]
-        then
+	#Lets register the device
+	RESPONSE=$( curl --insecure -X PUT --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/rooms/$ROOM/$MAC/$DEVICE" )
+	curl --insecure -X DELETE --header 'Accept: application/json' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/sessions/$TOKEN"
+	sleep 3
+	/usr/sbin/dhclient -r
+	sleep 1
+	/usr/sbin/dhclient
+	sleep 1
+	TOKEN=$( curl --insecure -X POST --header 'Content-Type: application/x-www-form-urlencoded' --header 'Accept: text/plain' -d "username=$username&password=$password" "https://${SERVER}/api/sessions/login" )
+	HOSTNAME=$( curl --insecure -X GET --header 'Accept: text/plain' "https://${SERVER}/api/clonetool/hostName" )
+	if [ -z "${HOSTNAME}" ]
+	then
 		dialog --backtitle "${CTOOLNAME}" --title "Registration fehlgeschlagen." --msgbox "Die Regsitrierung des Rechners ist Fehlgeschlagen.\nÜber die Adminoberfläche widerholen!" 17 60
 		exit 0
-        fi
+	fi
 	echo "TOKEN=$TOKEN" >  /tmp/apiparams
 }
 

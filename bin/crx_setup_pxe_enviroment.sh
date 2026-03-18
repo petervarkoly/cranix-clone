@@ -7,13 +7,6 @@ VERSION=$1
 DATE=$( /usr/share/cranix/tools/crx_date.sh )
 LANG=${RC_LANG:3:2}
 
-if [ -e /srv/tftp/linuxrc.config_$LANG ]
-then
-  cp  /srv/tftp/linuxrc.config_$LANG  /srv/tftp/linuxrc.config
-else
-  cp  /srv/tftp/linuxrc.config_DEFAULT  /srv/tftp/linuxrc.config
-fi
-
 for i in /srv/itool/config/*.templ
 do
    base="/srv/itool/config/"`basename $i .templ`
@@ -39,7 +32,7 @@ if [ ! -e /usr/share/cranix/templates/efiboot ]
 then
     cp /usr/share/cranix/templates/efiboot.in /usr/share/cranix/templates/efiboot
 fi
-if [ ! -e /srv/itool/config/Win10Domain.xml ]
+if [ ! -e /srv/itool/config/WinDomain.xml ]
 then
-        cp /srv/itool/config/Win10Domain.xml.templ /srv/itool/config/Win10Domain.xml
+        cp /srv/itool/config/WinDomain.xml.templ /srv/itool/config/WinDomain.xml
 fi

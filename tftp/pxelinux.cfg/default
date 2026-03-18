@@ -13,8 +13,8 @@ LABEL Festplatte
     LOCALBOOT 0
 
 LABEL CloneTool
-        kernel clone/linux
-        append initrd=clone/initrd install=exec:/bin/start_itool Info=tftp://install/linuxrc.config ITOOL=partimage STARTCMD=clone SLEEP=1 insecure=1 dhcptimeout=120
+        kernel boot/linux
+        append initrd=boot/initrd root=live:ftp://install/boot/squashfs.img ip=dhcp init=/bin/start_itool SLEEP=1
 
 
 #LABEL SUSE Linux Autoinstallation
