@@ -3,7 +3,7 @@ PACKAGE         = cranix-clone
 DESTDIR         = /
 DATE            = $(shell date "+%Y%m%d")
 INSTUSER	=
-REPO		= ~/OSC/home:pvarkoly:CRANIX/
+REPO		= ~/OSC/home:pvarkoly:CRANIX:eap15.6/
 #REPO		= /home/OSC/home:pvarkoly:CRANIX:installation-image/
 
 install:
