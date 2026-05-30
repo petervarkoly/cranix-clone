@@ -12,6 +12,7 @@ install:
 	install -m 444 $(INSTUSER)  config/efiboot.in            $(DESTDIR)/usr/share/cranix/templates/efiboot.in
 	#copy windows cleanup script
 	install -m 755 $(INSTUSER)  config/Win10_clean.ps1       $(DESTDIR)/usr/share/cranix/templates/
+	install -m 755 $(INSTUSER)  config/Win_clean.ps1         $(DESTDIR)/usr/share/cranix/templates/
 
 	#configure tftp service
 	mkdir -p       $(DESTDIR)/srv/tftp/{boot,pxelinux.cfg}
@@ -41,7 +42,6 @@ dist:
 	mkdir $(PACKAGE)
 	cp -rp Makefile bin config scripts tftp $(PACKAGE)
 	sed -i "s/#DATE#/$(DATE)/"       $(PACKAGE)/scripts/login
-	if [ -d clone ]; then cp -rp clone $(PACKAGE) ; fi
 	tar jcpf $(PACKAGE).tar.bz2 $(PACKAGE)
 	xterm -e git log --raw &
 	if [ -d $(REPO)/$(PACKAGE) ] ; then \
