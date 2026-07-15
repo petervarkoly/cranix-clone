@@ -652,18 +652,22 @@ make_autoconfig()
 	    *)
 	    ;;
 	esac
-	SALTCONF="/mnt/${PARTITION}/salt/conf";
-	if [ -d /mnt/${PARTITION}/etc/salt ]; then
-		SALTCONF=/mnt/${PARTITION}/etc/salt
-	fi
-        if [ -d ${SALTCONF} ]; then
-	    sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" ${SALTCONF}/minion
-	    echo "${HOSTNAME}.${DOMAIN}">  ${SALTCONF}/minion_id
-	    sed -i "s/^master:.*/master: ${SERVER}/"     ${SALTCONF}/minion
-	    rm -f ${SALTCONF}/pki/minion/*
-	    #Reset the minions ssh on the server
-	    curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/resetMinion"
-	fi
+	SALTCONF="/mnt/${PARTITION}/Programdata/Salt Project/Salt/conf";
+        if [ -d /mnt/${PARTITION}/etc/salt ]; then
+                SALTCONF=/mnt/${PARTITION}/etc/salt
+        fi
+
+        if [ -d /mnt/${PARTITION}/salt/conf ]; then
+                SALTCONF="/mnt/${PARTITION}/salt/conf"
+        fi
+	if [ -d "${SALTCONF}" ]; then
+            sed -i "s/^id:.*/id: ${HOSTNAME}.${DOMAIN}/" "${SALTCONF}/minion"
+            echo "${HOSTNAME}.${DOMAIN}">  "${SALTCONF}/minion_id"
+            sed -i "s/^master:.*/master: ${SERVER}/"  "${SALTCONF}/minion"
+            rm -f "${SALTCONF}/pki/minion/"*
+            #Reset the minions ssh on the server
+            curl --insecure -X PUT --header 'Accept: text/plain' --header "Authorization: Bearer $TOKEN" "https://${SERVER}/api/clonetool/resetMinion"
+        fi
 	# If a postscript for this partition exist we have to execute it
 	if [ -e /mnt/itool/images/$HW/$PARTITION-postscript.sh ]; then
 	    . /mnt/itool/images/$HW/$PARTITION-postscript.sh
