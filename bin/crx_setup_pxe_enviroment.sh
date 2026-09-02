@@ -39,5 +39,5 @@ fi
 
 /usr/bin/wget http://downloads.cephalix.eu/boot/initrd -O /srv/tftp/boot/initrd
 /usr/bin/wget http://downloads.cephalix.eu/boot/linux -O /srv/tftp/boot/linux
-/usr/bin/wget http://downloads.cephalix.eu/boot/squashfs.img -O /srv/ftp/boot/squashfs.img
+/usr/bin/wget http://downloads.cephalix.eu/boot/squashfs.img -O /srv/ftp/agama/squashfs.img
 

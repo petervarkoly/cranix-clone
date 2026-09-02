@@ -15,7 +15,6 @@ install:
 	install -m 755 $(INSTUSER)  config/Win_clean.ps1         $(DESTDIR)/usr/share/cranix/templates/
 
 	#configure tftp service
-	mkdir -p       $(DESTDIR)/srv/tftp/{boot,pxelinux.cfg}
 	rsync -aAv tftp/ $(DESTDIR)/srv/tftp/
 
 	#configure itool service
@@ -23,7 +22,7 @@ install:
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/images/manual
 	mkdir -p -m 2770 $(DESTDIR)/srv/itool/hwinfo
 	mkdir -p -m 2775 $(DESTDIR)/srv/itool/ROOT/root
-	mkdir -p -m 2775 $(DESTDIR)/srv/ftp/boot/
+	mkdir -p -m 2775 $(DESTDIR)/srv/ftp/agama/
 
 	mkdir -p $(DESTDIR)/etc/xinetd.d/
 	mkdir -p $(DESTDIR)/srv/itool/config
